@@ -1,7 +1,7 @@
 import { aas2 } from '@stoplight/spectral-formats';
 import { defined, pattern } from '@stoplight/spectral-functions';
 import { asyncapi } from '@stoplight/spectral-rulesets';
-import fieldLength from './functions/fieldLength';
+import { fieldLength } from './functions/fieldLength';
 
 export default {
   formats: [aas2],

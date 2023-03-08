@@ -2,18 +2,15 @@ require('./sourcemap-register.js');/******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
 /***/ 86719:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
 
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const spectral_formats_1 = __nccwpck_require__(13775);
 const spectral_functions_1 = __nccwpck_require__(75547);
 const spectral_rulesets_1 = __nccwpck_require__(22795);
-const fieldLength_1 = __importDefault(__nccwpck_require__(34942));
+const fieldLength_1 = __nccwpck_require__(34942);
 exports["default"] = {
     formats: [spectral_formats_1.aas2],
     extends: spectral_rulesets_1.asyncapi,
@@ -42,7 +39,7 @@ exports["default"] = {
             given: '$.info',
             then: {
                 field: 'description',
-                function: fieldLength_1.default,
+                function: fieldLength_1.fieldLength,
                 functionOptions: {
                     min: 30,
                 },
@@ -55,30 +52,14 @@ exports["default"] = {
 /***/ }),
 
 /***/ 34942:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+/***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const spectral_core_1 = __nccwpck_require__(35596);
-exports["default"] = (0, spectral_core_1.createRulesetFunction)({
-    input: {
-        type: 'string',
-    },
-    options: {
-        type: 'object',
-        additionalProperties: false,
-        properties: {
-            min: {
-                type: 'number',
-            },
-        },
-        required: ['min'],
-    },
-}, function fieldLength(input, options) {
+exports.fieldLength = void 0;
+function fieldLength(input, options) {
     try {
-        // console.log('input value is', input.length);
-        // console.log('options value is', options);
         if (input.length < options.min) {
             return [
                 {
@@ -95,7 +76,9 @@ exports["default"] = (0, spectral_core_1.createRulesetFunction)({
             },
         ];
     }
-});
+}
+exports.fieldLength = fieldLength;
+;
 
 
 /***/ }),
@@ -154,13 +137,12 @@ function run() {
             const errors = [];
             const spectral = new spectral_core_1.Spectral({ resolver: spectral_ref_resolver_1.httpAndFileResolver });
             spectral.setRuleset({ extends: [[asyncapiRulset_1.default, 'all']] });
-            const filePaths = core.getMultilineInput('files', { required: true });
-            //const filePaths = ['examples/asyncapi-02.yaml', 'examples/asyncapi-03.yaml'];
+            //const filePaths = core.getMultilineInput('files', { required: true });
+            const filePaths = ['examples/asyncapi-02.yaml', 'examples/asyncapi-03.yaml'];
             for (const filePath of filePaths) {
                 console.log(`\nLinting "${filePath}"...\n`);
                 const asyncApiFile = fs_1.default.readFileSync(filePath, 'utf8');
                 const problemList = yield spectral.run(asyncApiFile);
-                console.log(`\n AsyncaPI linting result from spectral \n ${JSON.stringify(problemList)}`);
                 formatResult(problemList, errors, filePath);
             }
             if (errors.length) {
