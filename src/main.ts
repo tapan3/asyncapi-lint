@@ -11,8 +11,8 @@ async function run(): Promise<void> {
     const errors: string[] = [];
     const spectral = new Spectral({ resolver: httpAndFileResolver });
     spectral.setRuleset({ extends: [[customRuleset as RulesetDefinition, 'all']] });
-    //const filePaths = core.getMultilineInput('files', { required: true });
-    const filePaths = ['examples/asyncapi-02.yaml', 'examples/asyncapi-03.yaml'];
+    const filePaths = core.getMultilineInput('files', { required: true });
+    //const filePaths = ['examples/asyncapi-02.yaml', 'examples/asyncapi-03.yaml'];
     for (const filePath of filePaths) {
       console.log(`\nLinting "${filePath}"...\n`);
       const asyncApiFile = fs.readFileSync(filePath, 'utf8');
