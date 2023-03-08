@@ -1,0 +1,873 @@
+asyncapi: 2.6.0
+info:
+  title: Linehaul Broadcaster
+  version: 1.0.0
+  description: >-
+    Linehaul Broadcaster proxies data from solace to pubsub and then to solace
+    again.
+  contact:
+    name: DSM Stevedores
+    url: >-
+      https://confluence.build.ingka.ikea.com/pages/viewpage.action?pageId=279990683
+    email: dl.dsm.stevedores@ingka.com
+channels:
+  'ingka.dsm.ado/consignment/full/create/V1/{compartment}/DSMLH/':
+    description: Topic where Linehaul Broadcaster will publish consignment create events
+    parameters:
+      compartment:
+        $ref: '#/components/parameters/Compartment'
+    subscribe:
+      operationId: 'ConsignmentCreate-v1'
+      summary: Linehaul Broadcaster publishes consignment create events on this topic
+      message:
+        $ref: '#/components/messages/ConsignmentCreate-v1'
+    x-ingka-attributes:
+      confidentiality: internal
+      visibility: ikea-internal
+      reusability: business
+      status: published
+      event-mesh-visibility: Global
+  'ingka.dsm.ado/consignment/full/cancel/V1/{compartment}/DSMLH/':
+    description: Topic where Linehaul Broadcaster will publish consignment cancel events
+    parameters:
+      compartment:
+        $ref: '#/components/parameters/Compartment'
+    subscribe:
+      operationId: 'ConsignmentCancel-v1'
+      summary: Linehaul Broadcaster publishes consignment cancel events on this topic
+      message:
+        $ref: '#/components/messages/ConsignmentCancel-v1'
+    x-ingka-attributes:
+      confidentiality: internal
+      visibility: ikea-internal
+      reusability: business
+      status: published
+      event-mesh-visibility: Global
+  'ingka.dsm.ado/consignment/full/dispatch/V1/{compartment}/DSMLH/':
+    description: Topic where Linehaul Broadcaster will publish consignment dispatch events
+    parameters:
+      compartment:
+        $ref: '#/components/parameters/Compartment'
+    subscribe:
+      operationId: 'ConsignmentDispatch-v1'
+      summary: Linehaul Broadcaster publishes consignment dispatch events on this topic
+      message: 
+        $ref: '#/components/messages/ConsignmentDispatch-v1'
+    x-ingka-attributes:
+      confidentiality: internal
+      visibility: ikea-internal
+      reusability: business
+      status: published
+      event-mesh-visibility: Global
+  'ingka.dsm.ado/consignment/full/unload/V1/{compartment}/DSMLH/':
+    description: Topic where Linehaul Broadcaster will publish consignment unload events
+    parameters:
+      compartment:
+        $ref: '#/components/parameters/Compartment'
+    subscribe:
+      operationId: 'ConsignmentUnload-v1'
+      summary: Linehaul Broadcaster publishes consignment dispatch events on this topic
+      message:
+        $ref: '#/components/messages/ConsignmentUnload-v1'
+    x-ingka-attributes:
+      confidentiality: internal
+      visibility: ikea-internal
+      reusability: business
+      status: published
+      event-mesh-visibility: Global
+  'ingka.dsm.ado/consignment/full/route/V1/{compartment}/DSMLH/':
+    description: Topic where Linehaul Broadcaster will publish consignment unload events
+    parameters:
+      compartment:
+        $ref: '#/components/parameters/Compartment'
+    subscribe:
+      operationId: 'ConsignmentRoute-v1'
+      summary: Linehaul Broadcaster publishes consignment route events on this topic
+      message:
+        $ref: '#/components/messages/ConsignmentRoute-v1'
+    x-ingka-attributes:
+      confidentiality: internal
+      visibility: ikea-internal
+      reusability: business
+      status: published
+      event-mesh-visibility: Global
+  ingka.dsm.ado/consignment/full/event/V1/:
+    description: Topic where Linehaul Broadcaster will publish consignment events
+    subscribe:
+      operationId: 'ConsignmentEvent-v1'
+      summary: Linehaul Broadcaster publishes consignment events on this topic
+      message:
+        $ref: '#/components/messages/ConsignmentEvent-v1'
+    x-ingka-attributes:
+      confidentiality: internal
+      visibility: ikea-internal
+      reusability: business
+      status: published
+      event-mesh-visibility: Global
+  ingka.dsm.ado/shipment/full/event/V1/:
+    description: Topic where Linehaul Broadcaster will publish shipment events
+    subscribe:
+      operationId : 'ShipmentEvent-v1'
+      summary: Linehaul Broadcaster publishes shipment events on this topic
+      message:
+        $ref: '#/components/messages/ShipmentEvent-v1'
+    x-ingka-attributes:
+      confidentiality: internal
+      visibility: ikea-internal
+      reusability: business
+      status: published
+      event-mesh-visibility: Global
+components:
+  parameters:
+    Compartment:
+      description: Event compartment in 2 characters
+      schema:
+        $ref: '#/components/schemas/Compartment'
+  messages:
+    ConsignmentCreate-v1:
+      payload:
+        $ref: '#/components/schemas/ConsignmentCreatePayload-v1'
+    ConsignmentCancel-v1:
+      payload:
+        $ref: '#/components/schemas/ConsignmentCancelPayload-v1'
+    ConsignmentDispatch-v1:
+      payload:
+        $ref: '#/components/schemas/ConsignmentDispatchPayload-v1'
+    ConsignmentUnload-v1:
+      payload:
+        $ref: '#/components/schemas/ConsignmentUnloadPayload-v1'
+    ConsignmentRoute-v1:
+      payload:
+        $ref: '#/components/schemas/ConsignmentRoutePayload-v1'
+    ConsignmentEvent-v1:
+      payload:
+        $ref: '#/components/schemas/ConsignmentEventPayload-v1'
+    ShipmentEvent-v1:
+      payload:
+        $ref: '#/components/schemas/ShipmentEventPayload-v1'
+  schemas:
+    Compartment:
+      type: string
+      enum:
+        - EU
+        - NA
+        - AP
+        - CN
+    ConsignmentCreatePayload-v1:
+      type: object
+      properties:
+        sourceSystem:
+          type: string
+        region:
+          type: string
+        messageTimeStamp:
+          type: string
+        consignmentId:
+          description: ConsignmentId is combination of businessUnit plus id
+          $ref: '#/components/schemas/Id'
+        consignorReference:
+          description: Consignor reference
+          $ref: '#/components/schemas/Reference'
+        consigneeReference:
+          description: Consignee reference
+          $ref: '#/components/schemas/Reference'
+        pickupAddress:
+          description: Pickup address
+          $ref: '#/components/schemas/Location'
+        dropOffAddress:
+          description: Pickup address
+          $ref: '#/components/schemas/Location'
+        termsOfDelivery:
+          description: Terms of delivery
+          $ref: '#/components/schemas/TermsOfDelivery'
+        orderedTransportTotalVolume:
+          description: Ordered total volume
+          $ref: '#/components/schemas/Volume'
+        orderedTransportTotalWeight:
+          description: Ordered total volume
+          $ref: '#/components/schemas/Weight'
+        dispatchTime:
+          description: Time of dispatch
+          $ref: '#/components/schemas/EventTime'
+        shipWithGroup:
+          description: Group with which is shipped
+          $ref: '#/components/schemas/ShipWithGroup'
+        planningType:
+          type: string
+        eventTime:
+          type: string
+      required:
+        - sourceSystem
+        - region
+        - messageTimeStamp
+        - consignmentId
+        - consignorReference
+        - consigneeReference
+        - pickupAddress
+        - dropOffAddress
+        - termsOfDelivery
+        - orderedTransportTotalVolume
+        - orderedTransportTotalWeight
+        - dispatchTime
+        - shipWithGroup
+        - planningType
+        - eventTime
+    ConsignmentCancelPayload-v1:
+      type: object
+      properties:
+        messageTimeStamp:
+          type: string
+        sourceSystem:
+          type: string
+        region:
+          type: string
+        consignmentId:
+          description: ConsignmentId is combination of businessUnit plus id
+          $ref: '#/components/schemas/Id'
+        eventTime:
+          type: string
+      required:
+        - messageTimeStamp
+        - sourceSystem
+        - region
+        - consignmentId
+        - eventTime
+    ConsignmentDispatchPayload-v1:
+      type: object
+      properties:
+        sourceSystem:
+          type: string
+        region:
+          type: string
+        messageTimeStamp:
+          type: string
+        consignmentId:
+          description: ConsignmentId is combination of businessUnit plus id
+          $ref: '#/components/schemas/Id'
+        actualDispatchTime:
+          type: string
+        totalGrossVolume:
+          description: Total gross volume dispatched
+          $ref: '#/components/schemas/Volume'
+        totalGrossWeight:
+          description: Total gross volume dispatched
+          $ref: '#/components/schemas/Weight'
+        consignmentLines:
+          type: array
+          items:
+            $ref: '#/components/schemas/DispatchConsignmentLine'
+        eventTime:
+          type: string
+      required:
+        - sourceSystem
+        - region
+        - messageTimeStamp
+        - consignmentId
+        - actualDispatchTime
+        - totalGrossVolume
+        - totalGrossWeight
+        - consignmentLines
+        - eventTime
+    ConsignmentUnloadPayload-v1:
+      type: object
+      properties:
+        sourceSystem:
+          type: string
+        region:
+          type: string
+        messageTimeStamp:
+          type: string
+        consignmentId:
+          description: ConsignmentId is combination of businessUnit plus id
+          $ref: '#/components/schemas/Id'
+        consignmentLines:
+          type: array
+          items:
+            $ref: '#/components/schemas/UnloadConsignmentLine'
+        eventTime:
+          type: string
+      required:
+        - sourceSystem
+        - region
+        - messageTimeStamp
+        - consignmentId
+        - consignmentLines
+        - eventTime
+    ConsignmentRoutePayload-v1:
+      type: object
+      properties:
+        messageId:
+          type: string
+        messageTime:
+          type: string
+        sourceOfInformation:
+          type: string
+        countryCode:
+          type: string
+        consignor:
+          description: Consignor
+          $ref: '#/components/schemas/Reference'
+        consignee:
+          description: Consignee
+          $ref: '#/components/schemas/Reference'
+        eventTime:
+          type: string
+        validFrom:
+          type: string
+        createTime:
+          type: string
+        updateTime:
+          type: string
+      required:
+        - messageId
+        - messageTime
+        - sourceOfInformation
+        - countryCode
+        - consignor
+        - consignee
+        - eventTime
+        - validFrom
+        - createTime
+    ConsignmentEventPayload-v1:
+      type: object
+      properties:
+        messageId:
+          type: string
+        messageTime:
+          type: string
+        sourceOfInformation:
+          type: string
+        currentEvent:
+          description: Consignment Event
+          $ref: '#/components/schemas/Event'
+        consignment:
+          $ref: '#/components/schemas/Consignment'
+      required:
+        - messageId
+        - messageTime
+        - sourceOfInformation
+        - currentEvent
+        - consignment
+    ShipmentEventPayload-v1:
+      type: object
+      properties:
+        messageId:
+          type: string
+        messageTime:
+          type: string
+        sourceOfInformation:
+          type: string
+        currentEvent:
+          $ref: '#/components/schemas/Event'
+        shipment:
+          $ref: '#/components/schemas/Shipment'
+    Id:
+      type: object
+      properties:
+        businessUnitCodeCreate:
+          type: integer
+        businessUnitTypeCreate:
+          type: string
+        idNumber:
+          type: string
+      required:
+        - businessUnitCodeCreate
+        - businessUnitTypeCreate
+        - idNumber
+    Event:
+      type: object
+      properties:
+        eventCode:
+          type: integer
+        eventSubcode:
+          type: string
+        eventTime:
+          type: string
+        eventLocation:
+          $ref: '#/components/schemas/Location'
+        sourceSystem:
+          type: string
+      required:
+        - eventCode
+        - eventTime
+        - eventLocation
+        - sourceSystem
+    Consignment:
+      type: object
+      properties:
+        region:
+          type: string
+        countryCode:
+          type: string
+        consignmentId:
+          $ref: '#/components/schemas/Id'
+        consignorReference:
+          $ref: '#/components/schemas/Reference'
+        consigneeReference:
+          $ref: '#/components/schemas/Reference'
+        pickupAddress:
+          $ref: '#/components/schemas/Location'
+        dropOffAddress:
+          $ref: '#/components/schemas/Location'
+        termsOfDelivery:
+          $ref: '#/components/schemas/TermsOfDelivery'
+        flowType:
+          type: string
+        planningType:
+          type: string
+        shipmentDetails:
+          $ref: '#/components/schemas/ShipmentDetails'
+        totalGrossVolume:
+          $ref: '#/components/schemas/Volume'
+        totalNetVolume:
+          $ref: '#/components/schemas/Volume'
+        totalGrossWeight:
+          $ref: '#/components/schemas/Weight'
+        totalNetWeight:
+          $ref: '#/components/schemas/Weight'
+        dispatchTime:
+          $ref: '#/components/schemas/EventTime'
+        arrivalTime:
+          $ref: '#/components/schemas/EventTime'
+        shipWithGroup:
+          description: Group with which is shipped
+          $ref: '#/components/schemas/ShipWithGroup'
+        noOfPackages:
+          type: integer
+        consignmentLines:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConsignmentEventConsignmentLine'
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/Event'
+      required:
+        - region
+        - countryCode
+        - consignmentId
+        - consignorReference
+        - consigneeReference
+        - pickupAddress
+        - dropOffAddress
+        - termsOfDelivery
+        - flowType
+        - planningType
+        - shipmentDetails
+        - totalGrossVolume
+        - totalNetVolume
+        - totalGrossWeight
+        - totalNetWeight
+        - dispatchTime
+        - arrivalTime
+        - shipWithGroup
+        - noOfPackages
+        - consignmentLines
+        - events
+    Reference:
+      type: object
+      properties:
+        businessUnitCode:
+          type: integer
+        businessUnitType:
+          type: string
+        businessUnitSequence:
+          type: integer
+      required:
+        - businessUnitCode
+        - businessUnitType
+        - businessUnitSequence
+    Location:
+      type: object
+      properties:
+        businessUnitCode:
+          type: integer
+        businessUnitType:
+          type: string
+        businessUnitSequence:
+          type: integer
+      required:
+        - businessUnitCode
+        - businessUnitType
+        - businessUnitSequence
+    TermsOfDelivery:
+      type: object
+      properties:
+        incoTerm:
+          type: string
+        agreedNamedPlaceReference:
+          $ref: '#/components/schemas/Location'
+      required:
+        - incoTerm
+        - agreedNamedPlaceReference
+    ShipmentDetails:
+      type: object
+      properties:
+        shipmentReference:
+          $ref: '#/components/schemas/Reference'
+        loadingUnitType:
+          type: string
+        loadingUnitId:
+          type: string
+      required:
+        - shipmentReference
+        - loadingUnitType
+        - loadingUnit
+    Volume:
+      type: object
+      properties:
+        volume:
+          type: number
+          format: decimal
+        UOMCode:
+          type: string
+      required:
+        - volume
+        - UOMCode
+    Weight:
+      type: object
+      properties:
+        weight:
+          type: number
+          format: decimal
+        UOMCode:
+          type: string
+      required:
+        - weight
+        - UOMCode
+    EventTime:
+      type: object
+      properties:
+        originallyPlanned:
+          type: string
+        estimated:
+          type: string
+        actual:
+          type: string
+      required:
+        - originallyPlanned
+        - estimated
+    ShipWithGroup:
+      type: object
+      properties:
+        groupName:
+          type: string
+        count:
+          type: integer
+    DispatchConsignmentLine:
+      type: object
+      properties:
+        consignmentLineNumber:
+          type: integer
+        unitLoadSSCC:
+          type: string
+        customerDistributionUnitId:
+          type: string
+        quantity:
+          $ref: '#/components/schemas/DispatchedQuantity'
+        itemNo:
+          type: string
+        itemType:
+          type: string
+        countryOfOrigin:
+          type: string
+        itemSupplierReference:
+          $ref: '#/components/schemas/ItemSupplierReference'
+        DWPKey:
+          $ref: '#/components/schemas/DWPKey'
+        salesOrderReference:
+          type: string
+        workOrderReference:
+          type: string
+        salesOrderLineKey:
+          type: string
+        productionWeek:
+          type: string
+      required:
+        - consignmentLineNumber
+        - unitLoadSSCC
+        - customerDistributionUnitId
+        - quantity
+        - itemNo
+        - itemType
+        - countryOfOrigin
+        - itemSupplierReference
+        - DWPKey
+        - salesOrderReference
+        - workOrderReference
+        - salesOrderLineKey
+        - productionWeek
+    ConsignmentEventConsignmentLine:
+      type: object
+      properties:
+        consignmentLineNumber:
+          type: integer
+        unitLoadSSCC:
+          type: string
+        customerDistributionUnitId:
+          type: string
+        noOfPackages:
+          type: integer
+        singleItemGrossWeight:
+          $ref: '#/components/schemas/Weight'
+        singleItemNetWeight:
+          $ref: '#/components/schemas/Weight'
+        singleItemGrossVolume:
+          $ref: '#/components/schemas/Volume'
+        singleItemNetVolume:
+          $ref: '#/components/schemas/Volume'
+        itemNo:
+          type: string
+        itemType:
+          type: string
+        itemDescription:
+          type: string
+        countryOfOrigin:
+          type: string
+        itemSupplierReference:
+          $ref: '#/components/schemas/ItemSupplierReference'
+        quantity:
+          $ref: '#/components/schemas/DispatchedQuantity'
+        DWPKey:
+          $ref: '#/components/schemas/DWPKey'
+        salesOrderReference:
+          type: string
+        workOrderReference:
+          type: string
+        salesOrderLineKey:
+          type: string
+        productionWeek:
+          type: string
+        isDamaged:
+          type: boolean
+      required:
+        - consignmentLineNumber
+        - unitLoadSSCC
+        - customerDistributionUnitId
+        - quantity
+        - itemNo
+        - itemType
+        - countryOfOrigin
+        - itemSupplierReference
+        - DWPKey
+        - salesOrderReference
+        - workOrderReference
+        - salesOrderLineKey
+        - productionWeek
+        - isDamaged
+        - noOfPackages
+        - singleItemGrossWeight
+        - singleItemNetWeight
+        - singleItemGrossVolume
+        - singleItemNetVolume
+    UnloadConsignmentLine:
+      type: object
+      properties:
+        consignmentLineNumber:
+          type: integer
+        quantity:
+          $ref: '#/components/schemas/UnloadedQuantity'
+        itemNo:
+          type: string
+        itemType:
+          type: string
+        isDamaged:
+          type: boolean
+      required:
+        - consignmentLineNumber
+        - quantity
+        - itemNo
+        - itemType
+        - isDamaged
+    DispatchedQuantity:
+      type: object
+      properties:
+        UOMCode:
+          type: string
+        dispatchedQuantity:
+          type: integer
+      required:
+        - UOMCode
+        - dispatchedQuantity
+    UnloadedQuantity:
+      type: object
+      properties:
+        UOMCode:
+          type: string
+        totalReceivedQuantity:
+          type: integer
+        damagedQuantity:
+          type: integer
+      required:
+        - UOMCode
+        - totalReceivedQuantity
+        - damagedQuantity
+    ItemSupplierReference:
+      type: object
+      properties:
+        businessUnitCode:
+          type: string
+        businessUnitType:
+          type: string
+      required:
+        - businessUnitCode
+        - businessUnitType
+    DWPKey:
+      type: object
+      properties:
+        itemNo:
+          type: string
+        itemType:
+          type: string
+        businessUnitCode:
+          type: string
+        businessUnitType:
+          type: string
+        number:
+          type: integer
+        edition:
+          type: integer
+        validFrom:
+          type: string
+      required:
+        - itemNo
+        - itemType
+        - businessUnitCode
+        - businessUnitType
+        - number
+        - edition
+        - validFrom
+    Shipment:
+      type: object
+      properties:
+        region:
+          type: string
+        countryCode:
+          type: string
+        shipmentId:
+          $ref: '#/components/schemas/Id'
+        shipmentType:
+          type: string
+        modeOfTransport:
+          type: string
+        shipmentFlowType:
+          type: string
+        locations:
+          type: array
+          $ref: '#/components/schemas/ShipmentLocation'
+        freightCost:
+          $ref: '#/components/schemas/FreightCost'
+        transportServiceProvider:
+          $ref: '#/components/schemas/TransportServiceProvider'
+        loadingUnitType:
+          type: string
+        loadingUnitTypeWeight:
+          $ref: '#/components/schemas/Weight'
+        loadingUnitTypeVolume:
+          $ref: '#/components/schemas/Volume'
+        loadingUnitId:
+          type: string
+        noOfPackages:
+          type: integer
+        totalGrossWeight:
+          $ref: '#/components/schemas/Weight'
+        totalNetWeight:
+          $ref: '#/components/schemas/Weight'
+        totalGrossVolume:
+          $ref: '#/components/schemas/Volume'
+        totalNetVolume:
+          $ref: '#/components/schemas/Volume'
+        events:
+          type: array
+          $ref: '#/components/schemas/Event'
+      required:
+        - region
+        - countryCode
+        - shipmentId
+        - shipmentType
+        - modeOfTransport
+        - shipmentFlowType
+        - locations
+        - freightCost
+        - transportServiceProvider
+        - loadingUnitType
+        - loadingUnitTypeWeight
+        - loadingUnitTypeVolume
+        - loadingUnitId
+        - noOfPackages
+        - totalGrossWeight
+        - totalNetWeight
+        - totalNetVolume
+        - totalGrossVolume
+        - events
+    FreightCost:
+      type: object
+      properties:
+        cost:
+          type: number
+          format: decimal
+        currency:
+          type: string
+      required:
+        - cost
+        - currency
+    TransportServiceProvider:
+      type: object
+      properties:
+        businessUnitCode:
+          type: string
+        businessUnitType:
+          type: string
+        name:
+          type: string
+      required:
+        - name
+        - businessUnitCode
+        - businessUnitType
+    ShipmentLocation:
+      type: object
+      properties:
+        locationType:
+          type: string
+        businessUnitCode:
+          type: string
+        businessUnitType:
+          type: string
+        businessUnitSequence:
+          type: integer
+        sequenceOfLocation:
+          type: integer
+        locations:
+          $ref: '#/components/schemas/ShipmentLocationTime'
+        connectedConsignments:
+          type: array
+          $ref: '#/components/schemas/ConnectedConsignment'
+      required:
+        - locationType
+        - businessUnitCode
+        - businessUnitType
+        - businessUnitSequence
+        - sequenceOfLocation
+        - locationTime
+        - connectedConsignments
+    ShipmentLocationTime:
+      type: object
+      properties:
+        locationEvent:
+          type: string
+        originallyPlanned:
+          type: string
+        estimated:
+          type: string
+        actual:
+          type: string
+      required:
+        - locationEvent
+        - originallyPlanned
+        - estimated
+        - actual
+    ConnectedConsignment:
+      type: object
+      properties:
+        consignmentId:
+          $ref: '#/components/schemas/Id'

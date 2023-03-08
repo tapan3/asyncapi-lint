@@ -1,0 +1,2409 @@
+asyncapi: 2.6.0
+info:
+  title: Workorder Hub
+  version: '1.0'
+  description: Service that 
+  contact:
+    name: DSM Argonauts
+    url: https://confluence.build.ingka.ikea.com/pages/viewpage.action?pageId=240370308
+    email: dl.dsm.argonauts.nl@ingka.com
+  license:
+    name: INGKA GROUP INNER SOURCE LICENCE VERSION 1.0
+    url: https://github.com/ingka-group-digital/dsm-workorder/blob/main/license.md
+servers:
+  Integration:
+    url: tcps://int-gke-euwe4-ext-ingka.messaging.solace.cloud:55443
+    protocol: Secure Solace Message Format (SMF)
+    description: Integration Google Broker Server
+  Stage:
+    url: tcps://qa-gke-euwe4-cgeu-1-fu-1-ext-ingka.messaging.solace.cloud:55443
+    protocol: Secure Solace Message Format (SMF)
+    description: Stage Google broker server
+  Production:
+    url: tcps://pro-gke-euwe4-cgeu-1-fu-1-ext-ingka.messaging.solace.cloud:55443
+    protocol: Secure Solace Message Format (SMF)
+    description: Production Google broker server
+channels:
+  ingka.dsm.ado/deliveryServiceWorkOrder/workOrder/create/V1/{compartment}/WOMGR:
+    description: Topic where clients of WorkOder hub requests to create new WorkOrder
+    parameters:
+      compartment:
+        $ref: '#/components/parameters/Compartment'
+    subscribe:
+      description: This topic is used to create work orders
+      operationId: workorder-create-events
+      summary: This WorkOrder app uses the creation events to create work orders.
+      message:
+        $ref: '#/components/messages/WorkOrderCreateEvent-v1'
+    x-ingka-attributes:
+      confidentiality: internal
+      visibility: ikea-internal
+      reusability: business
+      status: published
+      event-mesh-visibility: Global
+  ingka.dsm.ado/deliveryServiceWorkOrder/clickAndCollect/{verb}/V1/{compartment}/WOMGR/{countryCode}:
+    description: Topic where Workorder Hub will publish workorder related events
+    parameters:
+      verb:
+        $ref: '#/components/parameters/Verb'
+      compartment:
+        $ref: '#/components/parameters/Compartment'
+      countryCode:
+        $ref: '#/components/parameters/CountryCode'
+    subscribe:
+      description: This topic is used to get updates of click and collect work orders
+      operationId: click-colleck-events
+      summary: This WorkOrder app publishes the events related to workorders lifecycle on to this topic
+      message:
+        $ref: '#/components/messages/WorkOrderEvent-v1'
+    x-ingka-attributes:
+      confidentiality: internal
+      visibility: ikea-internal
+      reusability: business
+      status: published
+      event-mesh-visibility: Global
+  ingka.dsm.ado/deliveryServiceWorkOrder/homeDelivery/{verb}/V2/{compartment}/WOMGR/{countryCode}:
+    description: Topic where Workorder Hub will publish workorder related events
+    parameters:
+      verb:
+        $ref: '#/components/parameters/Verb'
+      countryCode:
+        $ref: '#/components/parameters/CountryCode'
+      compartment:
+        $ref: '#/components/parameters/Compartment'
+    subscribe:
+      description: This topic is used to get updates of home delivery work orders
+      operationId: home-delivery-events
+      summary: This WorkOrder app publishes the events related to workorders lifecycle on to this topic
+      message:
+        $ref: '#/components/messages/WorkOrderEvent-v2'
+    x-ingka-attributes:
+      confidentiality: internal
+      visibility: ikea-internal
+      reusability: business
+      status: published
+      event-mesh-visibility: Global
+  ingka.dsm.ado/deliveryServiceWorkOrder/IIP/confirmed/V1/{compartment}/WOMGR:
+    description: Topic where Centiro/IIP will publish workorder confirmation events
+    parameters:
+      compartment:
+        $ref: '#/components/parameters/Compartment'
+    subscribe:
+      description: This topic is used to get confirmed status of work orders
+      operationId: workorder-confirmed-events
+      summary: TBD - The message schema will be defined later on
+      message:
+        $ref: '#/components/messages/WorkOrderConfirmation-v1'
+    x-ingka-attributes:
+      confidentiality: internal
+      visibility: ikea-internal
+      reusability: business
+      status: published
+      event-mesh-visibility: Global
+  ingka.dsm.ado/deliveryServiceWorkOrder/shipment/confirmed/V0/{Compartment}/WOMGR/{EnterpriseCode}/{NodeKey}/{WorkorderNumber}:
+    description: Confirmations received from service providers
+    parameters:
+      Compartment:
+        $ref: '#/components/parameters/Compartment'
+      EnterpriseCode:
+        $ref: '#/components/parameters/EnterpriseCode'
+      NodeKey:
+        $ref: '#/components/parameters/NodeKey'
+      WorkorderNumber:
+        $ref: '#/components/parameters/WorkorderNumber'
+    subscribe:
+      description: This topic is used to get shipment confirmed status of work orders
+      operationId: shipment-confirmed-events
+      summary: Service provider confirmation
+      message:
+        $ref: '#/components/messages/WorkOrderConfirmed-v1'
+    x-ingka-attributes:
+      confidentiality: internal
+      visibility: ikea-internal
+      reusability: business
+      status: draft
+      event-mesh-visibility: Global
+  ingka.dsm.ado/deliveryServiceWorkOrder/shipment/ready/V1/{Compartment}/WOMGR/{CountryCode}/{SellingBusinessUnit}/{ShippingBusinessUnit}:
+    description: Shipment is ready for dispatch
+    parameters:
+      Compartment:
+        $ref: '#/components/parameters/Compartment'
+      CountryCode:
+        $ref: '#/components/parameters/CountryCode'
+      SellingBusinessUnit:
+        $ref: '#/components/parameters/BusinessUnit'
+      ShippingBusinessUnit:
+        $ref: '#/components/parameters/BusinessUnit'
+    subscribe:
+      description: This topic is used to get shipment ready status of work orders
+      operationId: shipment-ready-events
+      summary: Notification for a shipment which is ready for dispatching
+      message:
+        $ref: '#/components/messages/WorkOrderReady-v1'
+    x-ingka-attributes:
+      confidentiality: internal
+      visibility: ikea-internal
+      reusability: business
+      status: draft
+      event-mesh-visibility: Global
+components:
+  parameters:
+    DataScope:
+      description: Data Scope
+      schema:
+        type: string
+        enum:
+          - homeDelivery
+          - clickAndCollect
+    Verb:
+      description: Verb
+      schema:
+        type: string
+        enum:
+          - created
+          - cancelled
+    CountryCode:
+      description: Country in 2 characters.
+      schema:
+        type: string
+    Compartment:
+      description: Event compartment in 2 characters
+      schema:
+        $ref: '#/components/schemas/Compartment'
+    EnterpriseCode:
+      description: IKEA Enterprise code.
+      schema:
+        type: string
+    NodeKey:
+      description: Workorder node key.
+      schema:
+        type: string
+    WorkorderNumber:
+      description: Workorder number generated in ISOM.
+      schema:
+        type: string
+    BusinessUnit:
+      description: Business unit that either sells or ships (CDC, LSC or STO).
+      schema:
+        type: string
+
+  messages:
+    WorkOrderCreateEvent-v1:
+      payload:
+        $ref: '#/components/schemas/WorkOrderCreateEventPayload-v1'
+        contentType: application/json
+        schemaFormat: application/vnd.aai.asyncapi+json;version=2.0.0
+    WorkOrderEvent-v1:
+      payload:
+        $ref: '#/components/schemas/WorkOrderEventPayload-v1'
+        contentType: application/json
+        schemaFormat: application/vnd.aai.asyncapi+json;version=2.0.0
+    WorkOrderEvent-v2:
+      payload:
+        $ref: '#/components/schemas/WorkOrderEventPayload-v2'
+        contentType: application/json
+        schemaFormat: application/vnd.aai.asyncapi+json;version=2.0.0
+    WorkOrderConfirmation-v1:
+      payload:
+        $ref: '#/components/schemas/WorkOrderConfirmation-v1'
+        contentType: application/xml
+        schemaFormat: application/vnd.aai.asyncapi+json;version=2.0.0
+    WorkOrderConfirmed-v1:
+      payload:
+        $ref: '#/components/schemas/WorkOrderConfirmedPayload-v1'
+        contentType: application/json
+        schemaFormat: application/vnd.aai.asyncapi+json;version=2.0.0
+    WorkOrderReady-v1:
+      payload:
+        $ref: '#/components/schemas/WorkOrderReadyPayload-v1'
+        contentType: application/json
+        schemaFormat: application/vnd.aai.asyncapi+json;version=2.0.0
+
+  schemas:
+    CreateEventHeader:
+      type: object
+      required:
+        - sellerOrganizationCode
+        - serviceType
+        - country
+        - node
+        - environment
+        - topicID
+        - orderNoSrc
+        - compartment
+        - messageID
+        - eventOriginator
+        - eventType
+        - version
+      properties:
+        sellerOrganizationCode:
+          type: string
+        serviceType:
+          type: string
+        country:
+          type: string
+        node:
+          type: string
+        environment:
+          type: string
+        topicID:
+          type: string
+        orderNoSrc:
+          type: string
+        compartment:
+          type: string
+        messageID:
+          type: string
+        eventOriginator:
+          type: string
+        eventType:
+          type: string
+        version:
+          type: string
+        objectName:
+          type: string
+    Header:
+      type: object
+      properties:
+        contentType:
+          type: string
+        contentKey:
+          $ref: '#/components/schemas/ContentKey'
+        contentCreator:
+          type: string
+        compartment:
+          $ref: '#/components/schemas/Compartment'
+    ContentKey:
+      type: object
+      properties:
+        itemType:
+          type: string
+        itemNo:
+          type: string
+    Compartment:
+      type: string
+      enum:
+        - EU
+        - NA
+        - AP
+        - CN
+    WorkOrderCreateEventPayload-v1:
+      type: object
+      properties:
+        header:
+          $ref: '#/components/schemas/CreateEventHeader'
+        body:
+          $ref: '#/components/schemas/WorkOrderCreateEventBody-v1'
+    WorkOrderEventPayload-v1:
+      type: object
+      properties:
+        header:
+          $ref: '#/components/schemas/Header'
+        body:
+          $ref: '#/components/schemas/WorkOrderEventBody-v1'
+    WorkOrderEventBody-v1:
+      type: object
+      properties:
+        workorderId:
+          type: string
+        workOrderNumber:
+          type: integer
+        iSellOrderNumber:
+          type: integer
+        eventType:
+          $ref: '#/components/schemas/EventType'
+        status:
+          type: string
+        serviceType:
+          type: string
+        sellerOrgCode:
+          type: string
+        nodeKey:
+          type: string
+        providerId:
+          type: integer
+        compartment:
+          type: string
+        countryCode:
+          type: string
+        dimensions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Dimensions'
+        instructions:
+          $ref: '#/components/schemas/Instruction'
+    WorkOrderEventPayload-v2:
+      type: object
+      properties:
+        header:
+          $ref: '#/components/schemas/Header'
+        body:
+          $ref: '#/components/schemas/WorkOrderEventBody-v2'
+    WorkOrderEventBody-v2:
+      type: object
+      properties:
+        workOrder:
+          $ref: '#/components/schemas/WorkOrder'
+        workDetail:
+          $ref: '#/components/schemas/WorkDetail'
+        eventType:
+          $ref: '#/components/schemas/EventType'
+    EventType:
+      enum: ['WORKORDER_CREATED', 'WORKORDER_CANCELLED']
+    WorkOrder:
+      type: object
+      properties:
+        workOrderId:
+          type: integer
+        serviceOrderNumber:
+          type: string
+        iSellOrderNumber:
+          type: string
+        serviceType:
+          $ref: '#/components/schemas/ServiceType'
+        sellerOrgCode:
+          type: string
+        shippingOrgCode:
+          type: string
+        receivingOrgCode:
+          type: string
+        providerId:
+          type: string
+        enterpriseCode:
+          type: string
+        compartment:
+          $ref: '#/components/schemas/Compartment'
+        country:
+          type: string
+    ServiceType:
+      enum: ['HOME_DELIVERY', 'CLICK_COLLECT', 'CLICK_COLLECT_STORE', 'LOCKER', 'PUP', 'PUOP']
+    WorkDetail:
+      type: object
+      properties:
+        providerId:
+          type: integer
+        appointment:
+          $ref: '#/components/schemas/Appointment'
+          nodeKey:
+            type: string
+        originDetails:
+          $ref: '#/components/schemas/AddressDetails'
+        destinationDetails:
+          $ref: '#/components/schemas/AddressDetails'
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Item'
+        instructions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Instruction'
+    Appointment:
+      type: object
+      properties:
+        promisedEndDate:
+          type: string
+          description: End date of format 'yyyy-MM-dd'T'HH:mm:ss'
+          example: '2021-11-28T07:00:00'
+        promisedStartDate:
+          type: string
+          description: Start date of format 'yyyy-MM-dd'T'HH:mm:ss'
+          example: '2021-11-26T07:00:00'
+    AddressDetails:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        company:
+          type: string
+        mobilePhone:
+          type: string
+        email:
+          type: string
+        zipCode:
+          type: string
+        city:
+          type: string
+        country:
+          type: string
+        county:
+          type: string
+        state:
+          type: string
+        addressLine1:
+          type: string
+        addressLine2:
+          type: string
+        addressLine3:
+          type: string
+        addressLine4:
+          type: string
+        addressLine5:
+          type: string
+        addressLine6:
+          type: string
+    Item:
+      type: object
+      properties:
+        id:
+          type: string
+        description:
+          type: string
+        dimensions:
+          $ref: '#/components/schemas/Dimensions'
+    Dimensions:
+      type: object
+      properties:
+        package:
+          type: integer
+        width:
+          description: Package width
+          $ref: '#/components/schemas/DimensionUnit'
+        height:
+          description: Package height
+          $ref: '#/components/schemas/DimensionUnit'
+        length:
+          description: Package length
+          $ref: '#/components/schemas/DimensionUnit'
+        volume:
+          description: Package volume
+          $ref: '#/components/schemas/DimensionUnit'
+        weight:
+          description: Package weight
+          $ref: '#/components/schemas/DimensionUnit'
+    DimensionUnit:
+      type: object
+      properties:
+        value:
+          type: number
+          format: decimal
+        unit:
+          type: string
+    Instruction:
+      type: object
+      properties:
+        wheelchair:
+          type: boolean
+
+    WorkOrderConfirmation-v1:
+      type: object
+      properties:
+        EnterpriseCode:
+          type: string
+        DocumentType:
+          type: string
+        NodeKey:
+          type: string
+        OrderNo:
+          type: string
+        WorkOrderNo:
+          type: string
+        TimeWindowID:
+          type: string
+        DeliveryFrom:
+          type: string
+        DeliveryTo:
+          type: string
+        ShipNodeList:
+          type: array
+          items:
+            $ref: '#/components/schemas/ShipNodeConfirmation'
+    ShipNodeConfirmation:
+      type: object
+      properties:
+        ExpectedReceivingDateAtHub:
+          type: string
+        LatestShipDate:
+          type: string
+        ShipNode:
+          type: string
+        CutOffTime:
+          type: string
+
+    WorkOrderConfirmedPayload-v1:
+      type: object
+      properties:
+        Header:
+          $ref: '#/components/schemas/Header'
+        Body:
+          $ref: '#/components/schemas/WorkOrderConfirmation-v1'
+
+    OrderLine:
+      type: object
+      properties:
+        orderLineNumber:
+          type: integer
+        orderLineKey:
+          type: string
+        productNumber:
+          type: string
+        itemDescription:
+          type: string
+        quantityOrdered:
+          type: number
+        weight:
+          $ref: '#/components/schemas/DimensionUnit'
+        volume:
+          $ref: '#/components/schemas/DimensionUnit'
+
+    CDU:
+      type: object
+      properties:
+        trackingNumber:
+          type: string
+        dimensions:
+          $ref: '#/components/schemas/Dimensions'
+        orderLines:
+          type: array
+          $items: '#/components/schemas/OrderLine'
+
+    WorkOrderReadyBody-v1:
+      type: object
+      properties:
+        workOrder:
+          $ref: '#/components/schemas/WorkOrder'
+        cduList:
+          type: array
+          $items: '#/components/schemas/CDU'
+
+    WorkOrderReadyPayload-v1:
+      type: object
+      properties:
+        header:
+          $ref: '#/components/schemas/Header'
+        body:
+          $ref: '#/components/schemas/WorkOrderReadyBody-v1'
+    WorkOrderCreateEventBody-v1:
+      type: object
+      required:
+        - service
+      properties:
+        service:
+          type: object
+          required:
+            - subLineNo
+            - primeLineNo
+            - orderLineKey
+            - minLineStatusDesc
+            - itemID
+            - maxLineStatusDesc
+            - linePriceInfo
+            - workOrderNo
+            - statusQuantity
+            - order
+            - workOrder
+            - unitOfMeasure
+            - orderStatuses
+            - modifyts
+            - minLineStatus
+            - orderedQty
+            - node
+            - itemGroupCode
+            - maxLineStatus
+            - originalOrderedQty
+            - status
+          properties:
+            subLineNo:
+              type: string
+            primeLineNo:
+              type: string
+            deliveryMethod:
+              type: string
+            latestShipDate:
+              type: string
+            actualDeliveryDate:
+              type: string
+            currentWorkOrderKey:
+              type: string
+            expectedReceivingDateAtHub:
+              type: string
+            promisedApptEndDate:
+              type: string
+            currentApptSeq:
+              type: string
+            orderLineKey:
+              type: string
+            minLineStatusDesc:
+              type: string
+            itemID:
+              type: string
+            maxLineStatusDesc:
+              type: string
+            appointmentConfirmed:
+              type: string
+            capabilities:
+              type: string
+            capacityAllocated:
+              type: string
+            identifier:
+              type: string
+            numberOfLabels:
+              type: string
+            orginialUOM:
+              type: string
+            originalPSUOM:
+              type: string
+            pSRefArticles:
+              type: string
+            payTo:
+              type: string
+            rangePromisedApptEndDate:
+              type: string
+            serviceProviderId:
+              type: string
+            timeWindowID:
+              type: string
+            timeWindows:
+              type: string
+            totalDeliveryPrice:
+              type: string
+            vATValue:
+              type: string
+            documentType:
+              type: string
+            holdFlag:
+              type: string
+            isMultiApptRequired:
+              type: string
+            isPlanningComplete:
+              type: string
+            serviceAmount:
+              type: string
+            nodeKey:
+              type: string
+            openWorkOrderFlag:
+              type: string
+            orderNo:
+              type: string
+            pipeLineKey:
+              type: string
+            providerOrganizationCode:
+              type: string
+            serviceComplexityLevel:
+              type: string
+            serviceItemGroupCode:
+              type: string
+            serviceUom:
+              type: string
+            workOrderKey:
+              type: string
+            statusDate:
+              type: string
+            statusDescription:
+              type: string
+            timezone:
+              type: string
+            node:
+              type: string
+            itemGroupCode:
+              type: string
+            maxLineStatus:
+              type: string
+            originalOrderedQty:
+              type: string
+            status:
+              type: string
+            itemDesc:
+              type: string
+            itemShortDesc:
+              type: string
+            extn:
+              type: object
+              required: []
+              properties:
+                cutOffTime:
+                  type: string
+                fulfillmentType:
+                  type: string
+                numberOfLabels:
+                  type: string
+                returnLocation:
+                  type: string
+                sacId:
+                  type: string
+                tWChangeReasonCode:
+                  type: string
+            instructions:
+              type: object
+              required: []
+              properties:
+                numberOfInstructions:
+                  type: string
+                instruction:
+                  type: array
+                  required: []
+                  properties:
+                    instructionText:
+                      type: string
+                    instructionType:
+                      type: string
+                    instructionURL:
+                      type: string
+                    sequenceNo:
+                      type: string
+            schedules:
+              type: object
+              required: []
+              properties:
+                schedule:
+                  type: object
+                  required: []
+                  properties:
+                    batchNo:
+                      type: string
+                    changeInQuantity:
+                      type: string
+                    shipByDate:
+                      type: string
+                    procureFromNode:
+                      type: string
+                    receivingNode:
+                      type: string
+                    tagNumber:
+                      type: string
+                    status:
+                      type: string
+                    shipNode:
+                      type: string
+                    scheduleNo:
+                      type: string
+                    revisionNo:
+                      type: string
+                    quantity:
+                      type: string
+                    productAvailabilityDate:
+                      type: string
+                    orderReleaseKey:
+                      type: string
+                    orderLineScheduleKey:
+                      type: string
+                    orderLineKey:
+                      type: string
+                    orderHeaderKey:
+                      type: string
+                    modifyuserid:
+                      type: string
+                    modifyts:
+                      type: string
+                    modifyprogid:
+                      type: string
+                    mergeNode:
+                      type: string
+                    lotNumber:
+                      type: string
+                    lockid:
+                      type: string
+                    expectedShipmentDate:
+                      type: string
+                    expectedDeliveryDate:
+                      type: string
+                    dispositionCode:
+                      type: string
+                    createts:
+                      type: string
+                    createprogid:
+                      type: string
+                    createuserid:
+                      type: string
+                    chainedToOrderLineKey:
+                      type: string
+                    promisedApptEndDate:
+                      type: string
+                    promisedApptStartDate:
+                      type: string
+                    isHistory:
+                      type: string
+                    SourceFromOrganization:
+                      type: string
+                    OverrideProductClass:
+                      type: string
+                    OverrideUnitOfMeasure:
+                      type: string
+                    OverrideItemID:
+                      type: string
+                    OrderLineScheduleKey:
+                      type: string
+                    ShipByDate:
+                      type: string
+                    'scheduleTranQuantity ':
+                      type: object
+                      required: []
+                      properties:
+                        quantity:
+                          type: string
+                        transactionalUOM:
+                          type: string
+                        instructionURL:
+                          type: string
+            lineCharges:
+              type: object
+              required: []
+              properties:
+                retailPrice:
+                  type: string
+            lineTaxes:
+              type: object
+              required: []
+              properties:
+                lineTax:
+                  type: array
+                  required: []
+                  properties:
+                    chargeCategory:
+                      type: string
+                    chargeName:
+                      type: string
+                    chargeNameKey:
+                      type: string
+                    invoicedTax:
+                      type: string
+                    reference1:
+                      type: string
+                    reference2:
+                      type: string
+                    reference3:
+                      type: string
+                    remainingTax:
+                      type: string
+                    tax:
+                      type: string
+                    taxName:
+                      type: string
+                    taxPercentage:
+                      type: string
+            itemDetails:
+              type: object
+              required: []
+              properties:
+                itemID:
+                  type: string
+                unitOfMeasure:
+                  type: string
+                extn:
+                  type: object
+                  required: []
+                  properties:
+                    articlePackages:
+                      type: string
+                    supplierItemType:
+                      type: string
+                    transportMethodType:
+                      type: string
+                    UnitHeight:
+                      type: string
+                    UnitLength:
+                      type: string
+                    UnitWidth:
+                      type: string
+                primaryInformation:
+                  type: object
+                  required: []
+                  properties:
+                    unitHeight:
+                      type: string
+                    unitHeightUOM:
+                      type: string
+                    unitLength:
+                      type: string
+                    unitLengthUOM:
+                      type: string
+                    unitVolume:
+                      type: string
+                    unitVolumeUOM:
+                      type: string
+                    unitWeight:
+                      type: string
+                    unitWeightUOM:
+                      type: string
+                    unitWidth:
+                      type: string
+                    unitWidthUOM:
+                      type: string
+                    extn:
+                      type: object
+                      required: []
+                      properties:
+                        articlePackages:
+                          type: string
+                        supplierItemType:
+                          type: string
+                        transportMethodType:
+                          type: string
+                        UnitHeight:
+                          type: string
+                        UnitLength:
+                          type: string
+                        UnitWidth:
+                          type: string
+            orderLines:
+              type: object
+              required: []
+              properties:
+                orderLine:
+                  type: array
+                  required:
+                    - subLineNo
+                    - primeLineNo
+                    - unitOfMeasure
+                    - deliveryMethod
+                    - orderStatuses
+                    - modifyts
+                    - orderLineKey
+                    - minLineStatus
+                    - orderedQty
+                    - minLineStatusDesc
+                    - itemID
+                    - maxLineStatusDesc
+                    - shipNode
+                    - linePriceInfo
+                    - itemGroupCode
+                    - maxLineStatus
+                    - originalOrderedQty
+                    - status
+                    - statusQuantity
+                    - ReqShipDate
+                  properties:
+                    latestShipDate:
+                      type: string
+                    actualDeliveryDate:
+                      type: string
+                    currentWorkOrderKey:
+                      type: string
+                    subLineNo:
+                      type: string
+                    primeLineNo:
+                      type: string
+                    unitOfMeasure:
+                      type: string
+                    deliveryMethod:
+                      type: string
+                    expectedReceivingDateAtHub:
+                      type: string
+                    appointmentConfirmed:
+                      type: string
+                    capabilities:
+                      type: string
+                    capacityAllocated:
+                      type: string
+                    identifier:
+                      type: string
+                    numberOfLabels:
+                      type: string
+                    orginialUOM:
+                      type: string
+                    originalPSUOM:
+                      type: string
+                    pSRefArticles:
+                      type: string
+                    payTo:
+                      type: string
+                    rangePromisedApptEndDate:
+                      type: string
+                    serviceProviderId:
+                      type: string
+                    timeWindowID:
+                      type: string
+                    timeWindows:
+                      type: string
+                    totalDeliveryPrice:
+                      type: string
+                    vATValue:
+                      type: string
+                    workOrderNo:
+                      type: string
+                    orderStatuses:
+                      type: object
+                      required:
+                        - orderStatus
+                      properties:
+                        orderStatus:
+                          type: array
+                          required:
+                            - status
+                            - statusQty
+                          properties:
+                            status:
+                              type: string
+                            statusQty:
+                              type: string
+                            statusDate:
+                              type: string
+                    modifyts:
+                      type: string
+                    orderLineKey:
+                      type: string
+                    minLineStatus:
+                      type: string
+                    orderedQty:
+                      type: string
+                    minLineStatusDesc:
+                      type: string
+                    itemID:
+                      type: string
+                    maxLineStatusDesc:
+                      type: string
+                    shipNode:
+                      type: string
+                    levelOfService:
+                      type: string
+                    nodeKey:
+                      type: string
+                    linePriceInfo:
+                      type: object
+                      required: []
+                      properties:
+                        retailPrice:
+                          type: string
+                        isPriceLocked:
+                          type: string
+                        unitPrice:
+                          type: string
+                    instructions:
+                      type: object
+                      required: []
+                      properties:
+                        numberOfInstructions:
+                          type: string
+                        instruction:
+                          type: array
+                          required: []
+                          properties:
+                            instructionText:
+                              type: string
+                            instructionType:
+                              type: string
+                            instructionURL:
+                              type: string
+                            sequenceNo:
+                              type: string
+                    itemDetails:
+                      type: object
+                      required: []
+                      properties:
+                        itemID:
+                          type: string
+                        unitOfMeasure:
+                          type: string
+                        primaryInformation:
+                          type: object
+                          required: []
+                          properties:
+                            unitHeight:
+                              type: string
+                            unitHeightUOM:
+                              type: string
+                            unitLength:
+                              type: string
+                            unitLengthUOM:
+                              type: string
+                            unitVolume:
+                              type: string
+                            unitVolumeUOM:
+                              type: string
+                            unitWeight:
+                              type: string
+                            unitWeightUOM:
+                              type: string
+                            unitWidth:
+                              type: string
+                            unitWidthUOM:
+                              type: string
+                            extn:
+                              type: object
+                              required: []
+                              properties:
+                                articlePackages:
+                                  type: string
+                                supplierItemType:
+                                  type: string
+                                transportMethodType:
+                                  type: string
+                                unitHeight:
+                                  type: string
+                                unitLength:
+                                  type: string
+                                unitWidth:
+                                  type: string
+                        consumerPackageDetails:
+                          type: object
+                          required: []
+                          properties:
+                            consumerPackageDetail:
+                              type: array
+                              required: []
+                              properties:
+                                consumerPackage:
+                                  type: string
+                                height:
+                                  type: string
+                                heightUOM:
+                                  type: string
+                                length:
+                                  type: string
+                                lengthUOM:
+                                  type: string
+                                volume:
+                                  type: string
+                                volumeUOM:
+                                  type: string
+                                weight:
+                                  type: string
+                                weightUOM:
+                                  type: string
+                                width:
+                                  type: string
+                                widthUOM:
+                                  type: string
+                    lineTaxes:
+                      type: object
+                      required: []
+                      properties:
+                        lineTax:
+                          type: array
+                          required: []
+                          properties:
+                            chargeCategory:
+                              type: string
+                            chargeName:
+                              type: string
+                            chargeNameKey:
+                              type: string
+                            invoicedTax:
+                              type: string
+                            reference1:
+                              type: string
+                            reference2:
+                              type: string
+                            reference3:
+                              type: string
+                            remainingTax:
+                              type: string
+                            tax:
+                              type: string
+                            taxName:
+                              type: string
+                            taxPercentage:
+                              type: string
+                    schedules:
+                      type: object
+                      required: []
+                      properties:
+                        schedule:
+                          type: array
+                          required: []
+                          properties:
+                            batchNo:
+                              type: string
+                            changeInQuantity:
+                              type: string
+                            shipByDate:
+                              type: string
+                            procureFromNode:
+                              type: string
+                            receivingNode:
+                              type: string
+                            tagNumber:
+                              type: string
+                            status:
+                              type: string
+                            shipNode:
+                              type: string
+                            scheduleNo:
+                              type: string
+                            revisionNo:
+                              type: string
+                            quantity:
+                              type: string
+                            productAvailabilityDate:
+                              type: string
+                            orderReleaseKey:
+                              type: string
+                            orderLineScheduleKey:
+                              type: string
+                            orderLineKey:
+                              type: string
+                            orderHeaderKey:
+                              type: string
+                            modifyuserid:
+                              type: string
+                            modifyts:
+                              type: string
+                            modifyprogid:
+                              type: string
+                            mergeNode:
+                              type: string
+                            lotNumber:
+                              type: string
+                            lockid:
+                              type: string
+                            expectedShipmentDate:
+                              type: string
+                            expectedDeliveryDate:
+                              type: string
+                            dispositionCode:
+                              type: string
+                            createts:
+                              type: string
+                            createprogid:
+                              type: string
+                            createuserid:
+                              type: string
+                            chainedToOrderLineKey:
+                              type: string
+                            promisedApptEndDate:
+                              type: string
+                            isHistory:
+                              type: string
+                            SourceFromOrganization:
+                              type: string
+                            OverrideProductClass:
+                              type: string
+                            OverrideUnitOfMeasure:
+                              type: string
+                            OverrideItemID:
+                              type: string
+                            OrderLineScheduleKey:
+                              type: string
+                            ShipByDate:
+                              type: string
+                            'scheduleTranQuantity ':
+                              type: object
+                              required: []
+                              properties:
+                                quantity:
+                                  type: string
+                                transactionalUOM:
+                                  type: string
+                                instructionURL:
+                                  type: string
+                    lineCharges:
+                      type: object
+                      required: []
+                      properties:
+                        retailPrice:
+                          type: string
+                    itemGroupCode:
+                      type: string
+                    deliveryDate:
+                      type: string
+                    maxLineStatus:
+                      type: string
+                    originalOrderedQty:
+                      type: string
+                    status:
+                      type: string
+                    statusQuantity:
+                      type: string
+            linePriceInfo:
+              type: object
+              required: []
+              properties:
+                retailPrice:
+                  type: string
+                isPriceLocked:
+                  type: string
+                unitPrice:
+                  type: string
+            workOrderNo:
+              type: string
+            statusQuantity:
+              type: string
+            order:
+              type: object
+              required:
+                - sellerOrganizationCode
+                - entryType
+                - enterpriseCode
+                - orderNo
+                - personInfoShipTo
+                - documentType
+                - originalTotalAmount
+                - modifyts
+                - priceInfo
+                - orderHeaderKey
+                - orderNoSrc
+                - orderDate
+                - status
+                - maxOrderStatus
+              properties:
+                sellerOrganizationCode:
+                  type: string
+                entryType:
+                  type: string
+                enterpriseCode:
+                  type: string
+                orderNo:
+                  type: string
+                preferredLanguage:
+                  type: string
+                preferredCommunicationMethod:
+                  type: string
+                regionCode:
+                  type: string
+                paymentStatus:
+                  type: string
+                orderType:
+                  type: string
+                serviceType:
+                  type: string
+                billToID:
+                  type: string
+                sacId:
+                  type: string
+                personalizeCode:
+                  type: string
+                custCustPONo:
+                  type: string
+                customerEMailID:
+                  type: string
+                orderComplete:
+                  type: string
+                officialLanguage:
+                  type: string
+                originalTax:
+                  type: string
+                fileAttachments:
+                  type: object
+                  required: []
+                  properties:
+                    fileAttachment:
+                      type: array
+                      required: []
+                      properties:
+                        fileAttachmentKey:
+                          type: string
+                        fileContentType:
+                          type: string
+                        fileDescription:
+                          type: string
+                        fileName:
+                          type: string
+                        extn:
+                          type: object
+                          required: []
+                          properties:
+                            locationURL:
+                              type: string
+                            originalFileName:
+                              type: string
+                            servicePrimeLineNo:
+                              type: string
+                            systemSourceName:
+                              type: string
+                paymentMethods:
+                  type: object
+                  required: []
+                  properties:
+                    paymentMethod:
+                      type: array
+                      required: []
+                      properties:
+                        paymentType:
+                          type: string
+                productServiceAssocs:
+                  type: object
+                  required: []
+                  properties:
+                    productServiceAssoc:
+                      type: object
+                      required: []
+                      properties:
+                        action:
+                          type: string
+                        createts:
+                          type: string
+                        createprogid:
+                          type: string
+                        createuserid:
+                          type: string
+                        holdSchedTillCompletion:
+                          type: string
+                        lockid:
+                          type: string
+                        modifyprogid:
+                          type: string
+                        modifyts:
+                          type: string
+                        modifyuserid:
+                          type: string
+                        orderHeaderKey:
+                          type: string
+                        orderProdSerAssocKey:
+                          type: string
+                        pricingProductQuantity:
+                          type: string
+                        pricingServiceQuantity:
+                          type: string
+                        productLineKey:
+                          type: string
+                        productQuantity:
+                          type: string
+                        serviceLineKey:
+                          type: string
+                        serviceQuantity:
+                          type: string
+                        serviceTimeOffset:
+                          type: string
+                        isHistory:
+                          type: string
+                        productLine:
+                          type: object
+                          required: []
+                          properties:
+                            addToOrderReleaseKey:
+                              type: string
+                            apptStatus:
+                              type: string
+                            personalizeCode:
+                              type: string
+                            capacityUOM:
+                              type: string
+                            backorderNotificationQty:
+                              type: string
+                            basicCapacityRequired:
+                              type: string
+                            canAddServiceLines:
+                              type: string
+                            cannotMeetAppt:
+                              type: string
+                            carrierAccountNo:
+                              type: string
+                            carrierServiceCode:
+                              type: string
+                            conditionVariable1:
+                              type: string
+                            conditionVariable2:
+                              type: string
+                            createprogid:
+                              type: string
+                            createts:
+                              type: string
+                            createuserid:
+                              type: string
+                            currentWorkOrderKey:
+                              type: string
+                            customerLinePONo:
+                              type: string
+                            customerPONo:
+                              type: string
+                            deliveryCode:
+                              type: string
+                            deliveryMethod:
+                              type: string
+                            departmentCode:
+                              type: string
+                            dependencyRatio:
+                              type: string
+                            derivedFromExternalOrder:
+                              type: string
+                            derivedFromOrderHeaderKey:
+                              type: string
+                            derivedFromOrderLineKey:
+                              type: string
+                            earliestDeliveryDate:
+                              type: string
+                            earliestShipDate:
+                              type: string
+                            fillQuantity:
+                              type: string
+                            fixedCapacityQtyPerLine:
+                              type: string
+                            fixedPricingQtyPerLine:
+                              type: string
+                            freightTerms:
+                              type: string
+                            fulfillmentType:
+                              type: string
+                            giftFlag:
+                              type: string
+                            holdFlag:
+                              type: string
+                            holdReasonCode:
+                              type: string
+                            importLicenseNo:
+                              type: string
+                            intentionalBackorder:
+                              type: string
+                            invoiceBasedOnActuals:
+                              type: string
+                            invoiceComplete:
+                              type: string
+                            invoicedExtendedPrice:
+                              type: string
+                            invoicedQuantity:
+                              type: string
+                            isBlindLine:
+                              type: string
+                            isCapacityOverridden:
+                              type: string
+                            isCostOverridden:
+                              type: string
+                            isFirmPredefinedNode:
+                              type: string
+                            isPriceMatched:
+                              type: string
+                            isStandaloneService:
+                              type: string
+                            kitCode:
+                              type: string
+                            itemGroupCode:
+                              type: string
+                            lineSeqNo:
+                              type: string
+                            lineType:
+                              type: string
+                            lockid:
+                              type: string
+                            maintainRatio:
+                              type: string
+                            modifyprogid:
+                              type: string
+                            modifyts:
+                              type: string
+                            modifyuserid:
+                              type: string
+                            optionCapacityRequired:
+                              type: string
+                            orderClass:
+                              type: string
+                            orderHeaderKey:
+                              type: string
+                            orderLineKey:
+                              type: string
+                            orderedQty:
+                              type: string
+                            orderingUOM:
+                              type: string
+                            originalOrderedQty:
+                              type: string
+                            otherCharges:
+                              type: string
+                            overReceiptQuantity:
+                              type: string
+                            packListType:
+                              type: string
+                            parentOfDependentGroup:
+                              type: string
+                            personalizeFlag:
+                              type: string
+                            pickableFlag:
+                              type: string
+                            pipelineKey:
+                              type: string
+                            pricingDate:
+                              type: string
+                            primeLineNo:
+                              type: string
+                            promisedApptEndDate:
+                              type: string
+                            promisedApptStartDate:
+                              type: string
+                            propagationQty:
+                              type: string
+                            propagationToParentRequired:
+                              type: string
+                            purpose:
+                              type: string
+                            quantityToSplit:
+                              type: string
+                            receivedAsComponents:
+                              type: string
+                            receivedQty:
+                              type: string
+                            reservationID:
+                              type: string
+                            reservationMandatory:
+                              type: string
+                            reservationPool:
+                              type: string
+                            returnReason:
+                              type: string
+                            sCAC:
+                              type: string
+                            schedFailureReasonCode:
+                              type: string
+                            segment:
+                              type: string
+                            segmentType:
+                              type: string
+                            serialNo:
+                              type: string
+                            shipNode:
+                              type: string
+                            shipTogetherNo:
+                              type: string
+                            shippedQuantity:
+                              type: string
+                            splitFromLineKey:
+                              type: string
+                            splitFromPrimeLineNo:
+                              type: string
+                            splitFromSubLineNo:
+                              type: string
+                            splitQty:
+                              type: string
+                            subLineNo:
+                              type: string
+                            timezone:
+                              type: string
+                            totalQtyToCancel:
+                              type: string
+                            tranDiscrepancyQty:
+                              type: string
+                            transactionalLineId:
+                              type: string
+                            waitForSeqLine:
+                              type: string
+                            isHistory:
+                              type: string
+                        serviceLine:
+                          type: object
+                          required: []
+                          properties:
+                            addToOrderReleaseKey:
+                              type: string
+                            apptStatus:
+                              type: string
+                            capacityUOM:
+                              type: string
+                            personalizeCode:
+                              type: string
+                            backorderNotificationQty:
+                              type: string
+                            basicCapacityRequired:
+                              type: string
+                            canAddServiceLines:
+                              type: string
+                            cannotMeetAppt:
+                              type: string
+                            carrierAccountNo:
+                              type: string
+                            carrierServiceCode:
+                              type: string
+                            conditionVariable1:
+                              type: string
+                            conditionVariable2:
+                              type: string
+                            createprogid:
+                              type: string
+                            createts:
+                              type: string
+                            createuserid:
+                              type: string
+                            currentWorkOrderKey:
+                              type: string
+                            customerLinePONo:
+                              type: string
+                            customerPONo:
+                              type: string
+                            deliveryCode:
+                              type: string
+                            deliveryMethod:
+                              type: string
+                            departmentCode:
+                              type: string
+                            dependencyRatio:
+                              type: string
+                            derivedFromExternalOrder:
+                              type: string
+                            derivedFromOrderHeaderKey:
+                              type: string
+                            derivedFromOrderLineKey:
+                              type: string
+                            earliestDeliveryDate:
+                              type: string
+                            earliestShipDate:
+                              type: string
+                            fillQuantity:
+                              type: string
+                            fixedCapacityQtyPerLine:
+                              type: string
+                            fixedPricingQtyPerLine:
+                              type: string
+                            freightTerms:
+                              type: string
+                            fulfillmentType:
+                              type: string
+                            giftFlag:
+                              type: string
+                            holdFlag:
+                              type: string
+                            holdReasonCode:
+                              type: string
+                            importLicenseNo:
+                              type: string
+                            intentionalBackorder:
+                              type: string
+                            invoiceBasedOnActuals:
+                              type: string
+                            invoiceComplete:
+                              type: string
+                            invoicedExtendedPrice:
+                              type: string
+                            invoicedQuantity:
+                              type: string
+                            isBlindLine:
+                              type: string
+                            isCapacityOverridden:
+                              type: string
+                            isCostOverridden:
+                              type: string
+                            isFirmPredefinedNode:
+                              type: string
+                            isPriceMatched:
+                              type: string
+                            isStandaloneService:
+                              type: string
+                            kitCode:
+                              type: string
+                            itemGroupCode:
+                              type: string
+                            lineSeqNo:
+                              type: string
+                            lineType:
+                              type: string
+                            lockid:
+                              type: string
+                            maintainRatio:
+                              type: string
+                            modifyprogid:
+                              type: string
+                            modifyts:
+                              type: string
+                            modifyuserid:
+                              type: string
+                            optionCapacityRequired:
+                              type: string
+                            orderClass:
+                              type: string
+                            orderHeaderKey:
+                              type: string
+                            orderLineKey:
+                              type: string
+                            orderedQty:
+                              type: string
+                            orderingUOM:
+                              type: string
+                            originalOrderedQty:
+                              type: string
+                            otherCharges:
+                              type: string
+                            overReceiptQuantity:
+                              type: string
+                            packListType:
+                              type: string
+                            parentOfDependentGroup:
+                              type: string
+                            personalizeFlag:
+                              type: string
+                            pickableFlag:
+                              type: string
+                            pipelineKey:
+                              type: string
+                            pricingDate:
+                              type: string
+                            primeLineNo:
+                              type: string
+                            promisedApptEndDate:
+                              type: string
+                            promisedApptStartDate:
+                              type: string
+                            propagationQty:
+                              type: string
+                            propagationToParentRequired:
+                              type: string
+                            purpose:
+                              type: string
+                            quantityToSplit:
+                              type: string
+                            receivedAsComponents:
+                              type: string
+                            receivedQty:
+                              type: string
+                            reservationID:
+                              type: string
+                            reservationMandatory:
+                              type: string
+                            reservationPool:
+                              type: string
+                            returnReason:
+                              type: string
+                            sCAC:
+                              type: string
+                            schedFailureReasonCode:
+                              type: string
+                            segment:
+                              type: string
+                            segmentType:
+                              type: string
+                            serialNo:
+                              type: string
+                            shipNode:
+                              type: string
+                            shipTogetherNo:
+                              type: string
+                            shippedQuantity:
+                              type: string
+                            splitFromLineKey:
+                              type: string
+                            splitFromPrimeLineNo:
+                              type: string
+                            splitFromSubLineNo:
+                              type: string
+                            splitQty:
+                              type: string
+                            subLineNo:
+                              type: string
+                            timezone:
+                              type: string
+                            totalQtyToCancel:
+                              type: string
+                            tranDiscrepancyQty:
+                              type: string
+                            transactionalLineId:
+                              type: string
+                            waitForSeqLine:
+                              type: string
+                            isHistory:
+                              type: string
+                answerSets:
+                  type: object
+                  required: []
+                  properties:
+                    answerSet:
+                      type: array
+                      required: []
+                      properties:
+                        questionType:
+                          type: string
+                        answers:
+                          type: object
+                          required: []
+                          properties:
+                            answer:
+                              type: array
+                              required: []
+                              properties:
+                                answerValue:
+                                  type: string
+                                extn:
+                                  type: object
+                                  required: []
+                                  properties:
+                                    option:
+                                      type: string
+                                    questionRef:
+                                      type: string
+                                    servicePrimeLineNo:
+                                      type: string
+                personInfoShipTo:
+                  type: object
+                  required:
+                    - country
+                    - zipCode
+                  properties:
+                    country:
+                      type: string
+                    zipCode:
+                      type: string
+                    addressID:
+                      type: string
+                    addressLine1:
+                      type: string
+                    addressLine2:
+                      type: string
+                    addressLine3:
+                      type: string
+                    addressLine4:
+                      type: string
+                    addressLine5:
+                      type: string
+                    addressLine6:
+                      type: string
+                    alternateEmailID:
+                      type: string
+                    city:
+                      type: string
+                    company:
+                      type: string
+                    dayFaxNo:
+                      type: string
+                    dayPhone:
+                      type: string
+                    eMailID:
+                      type: string
+                    eveningPhone:
+                      type: string
+                    firstName:
+                      type: string
+                    lastName:
+                      type: string
+                    middleName:
+                      type: string
+                    mobilePhone:
+                      type: string
+                    otherPhone:
+                      type: string
+                    personID:
+                      type: string
+                    personInfoKey:
+                      type: string
+                    state:
+                      type: string
+                    extn:
+                      type: object
+                      required: []
+                      properties:
+                        addressLine7:
+                          type: string
+                        attention:
+                          type: string
+                        careOfName:
+                          type: string
+                        county:
+                          type: string
+                        alternativeCollectorFirstname:
+                          type: string
+                        alternativeCollectorSurname:
+                          type: string
+                personInfoBillTo:
+                  type: object
+                  required:
+                    - country
+                    - zipCode
+                  properties:
+                    country:
+                      type: string
+                    zipCode:
+                      type: string
+                    addressID:
+                      type: string
+                    addressLine1:
+                      type: string
+                    addressLine2:
+                      type: string
+                    addressLine3:
+                      type: string
+                    addressLine4:
+                      type: string
+                    addressLine5:
+                      type: string
+                    addressLine6:
+                      type: string
+                    alternateEmailID:
+                      type: string
+                    city:
+                      type: string
+                    company:
+                      type: string
+                    dayFaxNo:
+                      type: string
+                    dayPhone:
+                      type: string
+                    eMailID:
+                      type: string
+                    eveningPhone:
+                      type: string
+                    firstName:
+                      type: string
+                    lastName:
+                      type: string
+                    middleName:
+                      type: string
+                    mobilePhone:
+                      type: string
+                    otherPhone:
+                      type: string
+                    personID:
+                      type: string
+                    personInfoKey:
+                      type: string
+                    state:
+                      type: string
+                    extn:
+                      type: object
+                      required: []
+                      properties:
+                        addressLine7:
+                          type: string
+                        attention:
+                          type: string
+                        careOfName:
+                          type: string
+                        county:
+                          type: string
+                        alternativeCollectorFirstname:
+                          type: string
+                        alternativeCollectorSurname:
+                          type: string
+                documentType:
+                  type: string
+                originalTotalAmount:
+                  type: string
+                modifyts:
+                  type: string
+                priceInfo:
+                  type: object
+                  required:
+                    - currency
+                  properties:
+                    currency:
+                      type: string
+                orderHeaderKey:
+                  type: string
+                orderNoSrc:
+                  type: string
+                orderDate:
+                  type: string
+                status:
+                  type: string
+            workOrder:
+              type: object
+              required:
+                - extn
+                - workOrderKey
+                - workOrderNo
+                - status
+              properties:
+                workOrderKey:
+                  type: string
+                currentApptSeq:
+                  type: string
+                workOrderNo:
+                  type: string
+                createts:
+                  type: string
+                isMultiApptRequired:
+                  type: string
+                modifyts:
+                  type: string
+                orderNo:
+                  type: string
+                isPlanningComplete:
+                  type: string
+                serviceAmount:
+                  type: string
+                nodeKey:
+                  type: string
+                openWorkOrderFlag:
+                  type: string
+                serviceComplexityLevel:
+                  type: string
+                pipeLineKey:
+                  type: string
+                providerOrganizationCode:
+                  type: string
+                serviceItemGroupCode:
+                  type: string
+                serviceUom:
+                  type: string
+                statusDate:
+                  type: string
+                statusDescription:
+                  type: string
+                timezone:
+                  type: string
+                node:
+                  type: string
+                itemGroupCode:
+                  type: string
+                maxLineStatus:
+                  type: string
+                originalOrderedQty:
+                  type: string
+                status:
+                  type: string
+                documentType:
+                  type: string
+                enterpriseCode:
+                  type: string
+                holdFlag:
+                  type: string
+                extn:
+                  type: object
+                  required: []
+                  properties:
+                    numberOfLabels:
+                      type: string
+                    fulfillmentType:
+                      type: string
+                    cutOffTime:
+                      type: string
+                    returnLocation:
+                      type: string
+                    sacId:
+                      type: string
+                    tWChangeReasonCode:
+                      type: string
+                workOrderHoldTypes:
+                  type: object
+                  required: []
+                  properties:
+                    workOrderHoldType:
+                      type: array
+                      required: []
+                      properties:
+                        holdType:
+                          type: string
+                        status:
+                          type: string
+                workOrderStatusAudits:
+                  type: object
+                  required: []
+                  properties:
+                    workOrderStatusAudit:
+                      type: array
+                      required: []
+                      properties:
+                        auditTransactionId:
+                          type: string
+                        auditUserId:
+                          type: string
+                        comments:
+                          type: string
+                        newStatus:
+                          type: string
+                        newStatusAudit:
+                          type: string
+                        newStatusDate:
+                          type: string
+                        oldStatus:
+                          type: string
+                        oldStatusDate:
+                          type: string
+                        reasonCode:
+                          type: string
+                        tranname:
+                          type: string
+                        transactionId:
+                          type: string
+                        workOrderKey:
+                          type: string
+                        workOrderStatusAuditKey:
+                          type: string
+                workOrderServiceLines:
+                  type: object
+                  required: []
+                  properties:
+                    workOrderServiceLine:
+                      type: array
+                      required: []
+                      properties:
+                        action:
+                          type: string
+                        causeAppointmentChange:
+                          type: string
+                        createprogid:
+                          type: string
+                        createts:
+                          type: string
+                        createuserid:
+                          type: string
+                        isComplete:
+                          type: string
+                        itemID:
+                          type: string
+                        lineNo:
+                          type: string
+                        itemGroupCode:
+                          type: string
+                        lockid:
+                          type: string
+                        modifyprogid:
+                          type: string
+                        modifyuserid:
+                          type: string
+                        modifyts:
+                          type: string
+                        orderLineKey:
+                          type: string
+                        quantityRequired:
+                          type: string
+                        uom:
+                          type: string
+                        workOrderKey:
+                          type: string
+                        workOrderServiceLineKey:
+                          type: string
+                        isHistory:
+                          type: string
+                        hasChangedByThisTransaction:
+                          type: string
+                        itemDescription:
+                          type: string
+                        itemShortDescription:
+                          type: string
+                        orderLine:
+                          type: object
+                          required: []
+                          properties:
+                            orderLineKey:
+                              type: string
+                            primeLineNo:
+                              type: string
+                            subLineNo:
+                              type: string
+                            order:
+                              type: object
+                              required: []
+                              properties:
+                                documentType:
+                                  type: string
+                                enterpriseCode:
+                                  type: string
+                                orderHeaderKey:
+                                  type: string
+                                orderNo:
+                                  type: string
+                            additionalAddresses:
+                              type: object
+                              required: []
+                              properties:
+                                additionalAddress:
+                                  type: object
+                                  required: []
+                workOrderAppointments:
+                  type: object
+                  required: []
+                  properties:
+                    workOrderAppointment:
+                      type: array
+                      required: []
+                      properties:
+                        allocatedQuantity:
+                          type: string
+                        promisedApptEndDate:
+                          type: string
+                        promisedApptStartDate:
+                          type: string
+                        resourcePoolId:
+                          type: string
+                        workOrderApptKey:
+                          type: string
+                        extn:
+                          type: object
+                          required: []
+                          properties:
+                            capacityAllocated:
+                              type: string
+                            timeWindowID:
+                              type: string
+            unitOfMeasure:
+              type: string
+            orderStatuses:
+              type: object
+              required:
+                - orderStatus
+              properties:
+                orderStatus:
+                  type: array
+                  required:
+                    - status
+                    - statusQty
+                  properties:
+                    status:
+                      type: string
+                    statusQty:
+                      type: string
+                    statusDate:
+                      type: string
+            promisedApptStartDate:
+              type: string
+            modifyts:
+              type: string
+            minLineStatus:
+              type: string
+            orderedQty:
+              type: string
+            shipments:
+              type: object
+              required: []
+              properties:
+                shipment:
+                  type: array
+                  required: []
+                  properties:
+                    sellerOrganizationCode:
+                      type: string
+                    statusDate:
+                      type: string
+                    deliveryMethod:
+                      type: string
+                    documentType:
+                      type: string
+                    expectedDeliveryDate:
+                      type: string
+                    actualDeliveryDate:
+                      type: string
+                    enterpriseCode:
+                      type: string
+                    shipmentType:
+                      type: string
+                    shipNode:
+                      type: string
+                    mergeNode:
+                      type: string
+                    requestedDeliveryDate:
+                      type: string
+                    shipmentNo:
+                      type: string
+                    currency:
+                      type: string
+                    status:
+                      type: string
+                    extn:
+                      type: object
+                      required: []
+                      properties:
+                        numberOfLabels:
+                          type: string
+                        isPaid:
+                          type: string
+                        lastStatusDate:
+                          type: string
+                        cduID:
+                          type: string
+                        isCSMClosed:
+                          type: string
+                        isDamaged:
+                          type: string
+                    shipmentLines:
+                      type: object
+                      required: []
+                      properties:
+                        shipmentLine:
+                          type: array
+                          required: []
+                          properties:
+                            subLineNo:
+                              type: string
+                            itemID:
+                              type: string
+                            primeLineNo:
+                              type: string
+                            quantity:
+                              type: string
+                            shipmentLineNo:
+                              type: string
+                            documentType:
+                              type: string
+                            orderLineKey:
+                              type: string
+                            itemDesc:
+                              type: string
+                            extn:
+                              type: object
+                              required: []
+                              properties:
+                                consignmentLineNo:
+                                  type: string
+                                consignmentNo:
+                                  type: string
+                                dispatchedDate:
+                                  type: string
+                                itemSupplier:
+                                  type: string
+                                ownerOrganizationCode:
+                                  type: string

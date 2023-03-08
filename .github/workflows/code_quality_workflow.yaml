@@ -1,0 +1,31 @@
+name: Check code quality
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  code-quality:
+    name: Validate source code
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: ./node\_modules
+          key: ${{ runner.OS }}-dependencies-${{ hashFiles('\*\*/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.OS }}-dependencies-${{ env.cache-name }}-
+            ${{ runner.OS }}-dependencies-
+            ${{ runner.OS }}-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Format files
+        run: npm run format-check
+
+      - name: Lint files
+        run: npm run lint

@@ -1,0 +1,143 @@
+asyncapi: 2.0.0
+
+info:
+  description: Service that provides updates on route completion events
+  version: 1.0.0
+  contact:
+    name: DSM Settlements
+    email: dl.dsm.settsettlement.nl@ingka.com
+
+servers:
+  dev:
+    url: int-gke-euwe4-int-ingka.messaging.solace.cloud
+    protocol: amqp
+    description: Ingka Solace Dev
+  stage:
+    url: qa-gke-euwe4-cgeu-1-fu-1-int-ingka.messaging.solace.cloud
+    protocol: amqp
+    description: Ingka Solace Stage
+  prod:
+    url: pro-gke-euwe4-cgeu-1-fu-1-int-ingka.messaging.solace.cloud
+    protocol: amqp
+    description: Ingka Solace Prod
+
+channels:
+  'ingka.mover.sys/route/full/completed/V1/EU/MOVER':
+    description: Topic where Mover publishes routeCompleted events
+    subscribe:
+      operationId: processMoverRouteCompletedEvent
+      summary: Entity published to notify Settlements system about the route completion event
+      message:
+        payload:
+          $ref: '#/components/schemas/MoverRouteEvent'
+      bindings:
+        amqp:
+          ack: true
+    x-ingka-attributes:
+      confidentiality: internal
+      visibility: ikea-internal
+      reusability: business
+      status: draft
+      event-mesh-visibility: Global
+
+components:
+  schemas:
+    Actual:
+      type: object
+      properties:
+        duration:
+          type: integer
+        distance:
+          type: integer
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+
+    Estimate:
+      type: object
+      properties:
+        duration:
+          type: integer
+        distance:
+          type: integer
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+
+    Order:
+      type: object
+      properties:
+        id:
+          type: string
+        creatorOrderId:
+          type: string
+        creatorId:
+          type: string
+        relationalId:
+          type: string
+        status:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+
+    Route:
+      type: object
+      properties:
+        id:
+          type: string
+        slug:
+          type: string
+        reference:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        executors:
+          type: array
+          items:
+            type: string
+
+    RouteData:
+      type: object
+      properties:
+        route:
+          $ref: '#/components/schemas/Route'
+        orders:
+          type: array
+          items:
+            $ref: '#/components/schemas/Order'
+        estimate:
+          $ref: '#/components/schemas/Estimate'
+        actual:
+          $ref: '#/components/schemas/Actual'
+        correlationId:
+          type: string
+        timeOfEvent:
+          type: string
+          format: date-time
+
+    MoverRouteEvent:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+        version:
+          type: string
+        liveMode:
+          type: boolean
+        dateTime:
+          type: string
+          format: date-time
+        data:
+          $ref: '#/components/schemas/RouteData'
