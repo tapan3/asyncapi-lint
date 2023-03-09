@@ -73,7 +73,13 @@ TBD
 
 ## Which rules are used in this action?
 
-TBD
+Current set of rules contains recommended rules from the [spectral/async-api-rules](https://docs.stoplight.io/docs/spectral/1e63ffd0220f3-async-api-rules)package and the custom rules implemented on top of the recommended ones. Both of them together form the rules which conform [INGKA API standards](https://github.com/ingka-group-digital/api-standards/blob/main/docs/WebAPI/README.md) provided by the APIM team. All rules are listed in [asyncapiRulset](src/asyncapiRulset.ts) under the `rules` property.
+
+### Recommended rules (26)
+
+| Rule                                 | Severity | Description                                                                                                                                                                                                                                                                                           |
+| ------------------------------------ | :--------: | -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
+|`asyncapi-channel-no-empty-parameter` | error |  [Read more](https://docs.stoplight.io/docs/spectral/1e63ffd0220f3-async-api-rules#asyncapi-channel-no-empty-parameter)                                        
 
 ## How to add and configure existing rules?
 
