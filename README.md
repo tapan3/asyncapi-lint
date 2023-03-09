@@ -79,8 +79,8 @@ Current set of rules contains recommended rules from the [spectral/async-api-rul
 
 | Rule                                 | Severity | Description                                                                                                                                                                                                                                                                                           |
 | ------------------------------------ | :--------: | -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
-|`asyncapi-channel-no-empty-parameter` | error | Channel parameter declarations cannot be empty [Read more](https://docs.stoplight.io/docs/spectral/1e63ffd0220f3-async-api-rules#asyncapi-channel-no-empty-parameter)                              |
-
+|`asyncapi-channel-no-empty-parameter` | error | Channel parameter declarations cannot be empty [Read more](https://docs.stoplight.io/docs/spectral/1e63ffd0220f3-async-api-rules#asyncapi-channel-no-empty-parameter)                              
+                                                                                                |
 |`asyncapi-channel-no-query-nor-fragment` | error | Query parameters and fragments shouldn't be used in channel names [Read more](https://docs.stoplight.io/docs/spectral/1e63ffd0220f3-async-api-rules#asyncapi-channel-no-query-nor-fragment)                            |
 
 |`asyncapi-channel-no-trailing-slash` | error | Keep trailing slashes off of channel names, as it can cause some confusion [Read more](https://docs.stoplight.io/docs/spectral/1e63ffd0220f3-async-api-rules#asyncapi-channel-no-trailing-slash)                                 |                                  
