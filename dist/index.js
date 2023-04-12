@@ -1726,6 +1726,10 @@ function checkBypass(reqUrl) {
     if (!reqUrl.hostname) {
         return false;
     }
+    const reqHost = reqUrl.hostname;
+    if (isLoopbackAddress(reqHost)) {
+        return true;
+    }
     const noProxy = process.env['no_proxy'] || process.env['NO_PROXY'] || '';
     if (!noProxy) {
         return false;
@@ -1751,13 +1755,24 @@ function checkBypass(reqUrl) {
         .split(',')
         .map(x => x.trim().toUpperCase())
         .filter(x => x)) {
-        if (upperReqHosts.some(x => x === upperNoProxyItem)) {
+        if (upperNoProxyItem === '*' ||
+            upperReqHosts.some(x => x === upperNoProxyItem ||
+                x.endsWith(`.${upperNoProxyItem}`) ||
+                (upperNoProxyItem.startsWith('.') &&
+                    x.endsWith(`${upperNoProxyItem}`)))) {
             return true;
         }
     }
     return false;
 }
 exports.checkBypass = checkBypass;
+function isLoopbackAddress(host) {
+    const hostLower = host.toLowerCase();
+    return (hostLower === 'localhost' ||
+        hostLower.startsWith('127.') ||
+        hostLower.startsWith('[::1]') ||
+        hostLower.startsWith('[0:0:0:0:0:0:0:1]'));
+}
 //# sourceMappingURL=proxy.js.map
 
 /***/ }),
@@ -59881,6 +59896,7 @@ const linter_1 = __nccwpck_require__(14756);
 function runAction() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
+            console.log('inside actions.ts');
             const filePaths = core.getMultilineInput('files', { required: true });
             yield (0, linter_1.lint)(filePaths);
         }
@@ -59999,7 +60015,7 @@ const fs_1 = __importDefault(__nccwpck_require__(57147));
 const asyncapiRuleset_1 = __importDefault(__nccwpck_require__(82532));
 function lint(filePaths) {
     return __awaiter(this, void 0, void 0, function* () {
-        console.log(`\nLinting "started"...\n`);
+        console.log(`\nLinting "started inside linter.ts"...\n`);
         const errors = [];
         const spectral = new spectral_core_1.Spectral({ resolver: spectral_ref_resolver_1.httpAndFileResolver });
         spectral.setRuleset({ extends: [[asyncapiRuleset_1.default, 'all']] });

@@ -5,7 +5,7 @@ import fs from 'fs';
 import asyncApiRuleset from './asyncapiRuleset';
 
 export async function lint(filePaths: string[]): Promise<void> {
-  console.log(`\nLinting "started"...\n`);
+  console.log(`\nLinting "started inside linter.ts"...\n`);
   const errors: string[] = [];
   const spectral = new Spectral({ resolver: httpAndFileResolver });
   spectral.setRuleset({ extends: [[asyncApiRuleset as RulesetDefinition, 'all']] });

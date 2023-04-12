@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { lint } from './linter';
-
+console.log('inside cli.ts');
 const filePath = process.argv[2];
 
 if (!filePath) {
