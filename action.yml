@@ -1,9 +1,0 @@
-name: 'Lint AsyncAPI Action'
-description: 'Use lint-asyncapi in GitHub Actions'
-inputs:
-  files:
-    required: true
-    description: 'Paths to files to lint'
-runs:
-  using: 'node16'
-  main: 'dist/index.js'
