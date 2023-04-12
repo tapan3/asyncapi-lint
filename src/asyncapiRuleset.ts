@@ -7,9 +7,11 @@ export default {
   formats: [aas2],
   extends: asyncapi,
   rules: {
-    'valid-document-version': {
-      message: 'Version should match 1.x.x',
-      severity: 'warn',
+    'asyncapi-info-description': 'error',
+    'asyncapi-info-contact': 'error',
+    'custom-info-version': {
+      message: 'Version must be present and follow semantic versioning.',
+      severity: 'error',
       given: '$.info',
       then: [
         {
@@ -25,9 +27,9 @@ export default {
         },
       ],
     },
-    'valid-field-length': {
+    'custom-info-description': {
       message: '{{error}}',
-      severity: 'warn',
+      severity: 'error',
       given: '$.info',
       then: {
         field: 'description',

@@ -1,205 +1,6 @@
 require('./sourcemap-register.js');/******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ 86719:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const spectral_formats_1 = __nccwpck_require__(13775);
-const spectral_functions_1 = __nccwpck_require__(75547);
-const spectral_rulesets_1 = __nccwpck_require__(22795);
-const fieldLength_1 = __nccwpck_require__(34942);
-exports["default"] = {
-    formats: [spectral_formats_1.aas2],
-    extends: spectral_rulesets_1.asyncapi,
-    rules: {
-        'valid-document-version': {
-            message: 'Version should match 1.x.x',
-            severity: 'warn',
-            given: '$.info',
-            then: [
-                {
-                    field: 'version',
-                    function: spectral_functions_1.defined,
-                },
-                {
-                    field: 'version',
-                    function: spectral_functions_1.pattern,
-                    functionOptions: {
-                        match: '^1(\\.[0-9]+){2}$',
-                    },
-                },
-            ],
-        },
-        'valid-field-length': {
-            message: '{{error}}',
-            severity: 'warn',
-            given: '$.info',
-            then: {
-                field: 'description',
-                function: fieldLength_1.fieldLength,
-                functionOptions: {
-                    min: 30,
-                },
-            },
-        },
-    },
-};
-
-
-/***/ }),
-
-/***/ 34942:
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.fieldLength = void 0;
-function fieldLength(input, options) {
-    try {
-        if (input.length < options.min) {
-            return [
-                {
-                    message: `Write a well formatted brief description of your API with atleast 30 char long`,
-                },
-            ];
-        }
-        return [];
-    }
-    catch (ex) {
-        return [
-            {
-                message: ex instanceof Error ? ex.message : String(ex),
-            },
-        ];
-    }
-}
-exports.fieldLength = fieldLength;
-
-
-/***/ }),
-
-/***/ 3109:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const core = __importStar(__nccwpck_require__(42186));
-const spectral_core_1 = __nccwpck_require__(35596);
-const spectral_ref_resolver_1 = __nccwpck_require__(86634);
-const ansi_styles_1 = __importDefault(__nccwpck_require__(52068));
-const fs_1 = __importDefault(__nccwpck_require__(57147));
-const asyncapiRulset_1 = __importDefault(__nccwpck_require__(86719));
-function run() {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            console.log(`\nLinting "started"...\n`);
-            const errors = [];
-            const spectral = new spectral_core_1.Spectral({ resolver: spectral_ref_resolver_1.httpAndFileResolver });
-            spectral.setRuleset({ extends: [[asyncapiRulset_1.default, 'all']] });
-            const filePaths = core.getMultilineInput('files', { required: true });
-            //const filePaths = ['examples/asyncapi-02.yaml', 'examples/asyncapi-03.yaml'];
-            for (const filePath of filePaths) {
-                console.log(`\nLinting "${filePath}"...\n`);
-                const asyncApiFile = fs_1.default.readFileSync(filePath, 'utf8');
-                const problemList = yield spectral.run(asyncApiFile);
-                formatResult(problemList, errors, filePath);
-            }
-            if (errors.length) {
-                throw new Error(`Following files contain errors: ${errors.join(', ')}.`);
-            }
-        }
-        catch (error) {
-            if (error instanceof Error) {
-                core.setFailed(error.message);
-            }
-        }
-    });
-}
-function formatResult(problemList, errors, filePath) {
-    var _a, _b, _c, _d;
-    for (const problemline of problemList) {
-        const lineCol = `${(_a = problemline.range) === null || _a === void 0 ? void 0 : _a.start.line}:${(_b = problemline.range) === null || _b === void 0 ? void 0 : _b.start.character} to ${(_c = problemline.range) === null || _c === void 0 ? void 0 : _c.end.line}:${(_d = problemline.range) === null || _d === void 0 ? void 0 : _d.end.character}`;
-        let coloredSeverity;
-        if (problemline.severity === 0) {
-            coloredSeverity = `${ansi_styles_1.default.red.open}"error"${ansi_styles_1.default.red.close}`;
-        }
-        else if (problemline.severity === 1) {
-            coloredSeverity = `${ansi_styles_1.default.yellow.open}"warn"${ansi_styles_1.default.yellow.close}`;
-        }
-        else {
-            coloredSeverity = `${ansi_styles_1.default.blueBright.open}"info"${ansi_styles_1.default.blueBright.close}`;
-        }
-        const linterPath = problemline.path.length === 0 ? '#' : problemline.path.join(' && ');
-        const linterPointer = `${ansi_styles_1.default.underline.open} ${linterPath} ${ansi_styles_1.default.underline.close}`;
-        const linterMessage = `  ${lineCol}  ${coloredSeverity}  ${problemline.message}  ${ansi_styles_1.default.bold.open}${problemline.code}${ansi_styles_1.default.bold.close}\n`;
-        console.log(linterPointer);
-        console.log(linterMessage);
-    }
-    const problemsCount = problemList.length;
-    const problemsCountMessage = `${problemsCount} problem${problemsCount === 1 ? '' : 's'}`;
-    const errorsCount = problemList.filter(problem => problem.severity === 0).length;
-    const errorsCountMessage = `${errorsCount} error${errorsCount === 1 ? '' : 's'}`;
-    const warningsCount = problemList.filter(problem => problem.severity === 1).length;
-    const warningsCountMessage = `${warningsCount} warning${warningsCount === 1 ? '' : 's'}`;
-    const infoCount = problemList.filter(problem => problem.severity === 2).length;
-    const infoCountMessage = `${infoCount} info${infoCount === 1 ? '' : 's'}`;
-    const finalMessage = problemsCount
-        ? `${ansi_styles_1.default.yellow.open}${ansi_styles_1.default.bold.open}✖ ${problemsCountMessage} (${errorsCountMessage}, ${warningsCountMessage}, ${infoCountMessage})${ansi_styles_1.default.bold.close}${ansi_styles_1.default.yellow.close}\n`
-        : `${ansi_styles_1.default.green.open}${ansi_styles_1.default.bold.open}No problems found in the provided OpenAPI specification file.${ansi_styles_1.default.bold.close}${ansi_styles_1.default.green.close}\n`;
-    console.log(finalMessage);
-    if (errorsCount) {
-        errors.push(`"${filePath}"`);
-        console.log(`"${filePath}" contains errors.\n`);
-    }
-    else {
-        console.log(`"${filePath}" passes linting.\n`);
-    }
-}
-run();
-
-
-/***/ }),
-
 /***/ 87351:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -1925,10 +1726,6 @@ function checkBypass(reqUrl) {
     if (!reqUrl.hostname) {
         return false;
     }
-    const reqHost = reqUrl.hostname;
-    if (isLoopbackAddress(reqHost)) {
-        return true;
-    }
     const noProxy = process.env['no_proxy'] || process.env['NO_PROXY'] || '';
     if (!noProxy) {
         return false;
@@ -1954,24 +1751,13 @@ function checkBypass(reqUrl) {
         .split(',')
         .map(x => x.trim().toUpperCase())
         .filter(x => x)) {
-        if (upperNoProxyItem === '*' ||
-            upperReqHosts.some(x => x === upperNoProxyItem ||
-                x.endsWith(`.${upperNoProxyItem}`) ||
-                (upperNoProxyItem.startsWith('.') &&
-                    x.endsWith(`${upperNoProxyItem}`)))) {
+        if (upperReqHosts.some(x => x === upperNoProxyItem)) {
             return true;
         }
     }
     return false;
 }
 exports.checkBypass = checkBypass;
-function isLoopbackAddress(host) {
-    const hostLower = host.toLowerCase();
-    return (hostLower === 'localhost' ||
-        hostLower.startsWith('127.') ||
-        hostLower.startsWith('[::1]') ||
-        hostLower.startsWith('[0:0:0:0:0:0:0:1]'));
-}
 //# sourceMappingURL=proxy.js.map
 
 /***/ }),
@@ -60052,6 +59838,227 @@ module.exports.implForWrapper = function (wrapper) {
 
 /***/ }),
 
+/***/ 17672:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const core = __importStar(__nccwpck_require__(42186));
+const linter_1 = __nccwpck_require__(14756);
+function runAction() {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const filePaths = core.getMultilineInput('files', { required: true });
+            yield (0, linter_1.lint)(filePaths);
+        }
+        catch (error) {
+            if (error instanceof Error) {
+                core.setFailed(error.message);
+            }
+        }
+    });
+}
+runAction();
+
+
+/***/ }),
+
+/***/ 82532:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const spectral_formats_1 = __nccwpck_require__(13775);
+const spectral_functions_1 = __nccwpck_require__(75547);
+const spectral_rulesets_1 = __nccwpck_require__(22795);
+const fieldLength_1 = __nccwpck_require__(37057);
+exports["default"] = {
+    formats: [spectral_formats_1.aas2],
+    extends: spectral_rulesets_1.asyncapi,
+    rules: {
+        'asyncapi-info-description': 'error',
+        'asyncapi-info-contact': 'error',
+        'custom-info-version': {
+            message: 'Version must be present and follow semantic versioning.',
+            severity: 'error',
+            given: '$.info',
+            then: [
+                {
+                    field: 'version',
+                    function: spectral_functions_1.defined,
+                },
+                {
+                    field: 'version',
+                    function: spectral_functions_1.pattern,
+                    functionOptions: {
+                        match: '^1(\\.[0-9]+){2}$',
+                    },
+                },
+            ],
+        },
+        'custom-info-description': {
+            message: '{{error}}',
+            severity: 'error',
+            given: '$.info',
+            then: {
+                field: 'description',
+                function: fieldLength_1.fieldLength,
+                functionOptions: {
+                    min: 30,
+                },
+            },
+        },
+    },
+};
+
+
+/***/ }),
+
+/***/ 37057:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.fieldLength = void 0;
+function fieldLength(input, options) {
+    if (!input) {
+        return [];
+    }
+    if (input.length < options.min) {
+        return [
+            {
+                message: `Write a well formatted brief description of your API with at least 30 char long.`,
+            },
+        ];
+    }
+    return [];
+}
+exports.fieldLength = fieldLength;
+
+
+/***/ }),
+
+/***/ 14756:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.lint = void 0;
+const spectral_core_1 = __nccwpck_require__(35596);
+const spectral_ref_resolver_1 = __nccwpck_require__(86634);
+const ansi_styles_1 = __importDefault(__nccwpck_require__(52068));
+const fs_1 = __importDefault(__nccwpck_require__(57147));
+const asyncapiRuleset_1 = __importDefault(__nccwpck_require__(82532));
+function lint(filePaths) {
+    return __awaiter(this, void 0, void 0, function* () {
+        console.log(`\nLinting "started"...\n`);
+        const errors = [];
+        const spectral = new spectral_core_1.Spectral({ resolver: spectral_ref_resolver_1.httpAndFileResolver });
+        spectral.setRuleset({ extends: [[asyncapiRuleset_1.default, 'all']] });
+        for (const filePath of filePaths) {
+            console.log(`\nLinting "${filePath}"...\n`);
+            const asyncApiFile = fs_1.default.readFileSync(filePath, 'utf8');
+            const problemList = yield spectral.run(asyncApiFile);
+            formatResult(problemList, errors, filePath);
+        }
+        if (errors.length) {
+            throw new Error(`Following files contain errors: ${errors.join(', ')}.`);
+        }
+    });
+}
+exports.lint = lint;
+function formatResult(problemList, errors, filePath) {
+    var _a, _b, _c, _d;
+    for (const problemline of problemList) {
+        const lineCol = `${(_a = problemline.range) === null || _a === void 0 ? void 0 : _a.start.line}:${(_b = problemline.range) === null || _b === void 0 ? void 0 : _b.start.character} to ${(_c = problemline.range) === null || _c === void 0 ? void 0 : _c.end.line}:${(_d = problemline.range) === null || _d === void 0 ? void 0 : _d.end.character}`;
+        let coloredSeverity;
+        if (problemline.severity === 0) {
+            coloredSeverity = `${ansi_styles_1.default.red.open}"error"${ansi_styles_1.default.red.close}`;
+        }
+        else if (problemline.severity === 1) {
+            coloredSeverity = `${ansi_styles_1.default.yellow.open}"warn"${ansi_styles_1.default.yellow.close}`;
+        }
+        else {
+            coloredSeverity = `${ansi_styles_1.default.blueBright.open}"info"${ansi_styles_1.default.blueBright.close}`;
+        }
+        const linterPath = problemline.path.length === 0 ? '#' : problemline.path.join(' && ');
+        const linterPointer = `${ansi_styles_1.default.underline.open} ${linterPath} ${ansi_styles_1.default.underline.close}`;
+        const linterMessage = `  ${lineCol}  ${coloredSeverity}  ${problemline.message}  ${ansi_styles_1.default.bold.open}${problemline.code}${ansi_styles_1.default.bold.close}\n`;
+        console.log(linterPointer);
+        console.log(linterMessage);
+    }
+    const problemsCount = problemList.length;
+    const problemsCountMessage = `${problemsCount} problem${problemsCount === 1 ? '' : 's'}`;
+    const errorsCount = problemList.filter(problem => problem.severity === 0).length;
+    const errorsCountMessage = `${errorsCount} error${errorsCount === 1 ? '' : 's'}`;
+    const warningsCount = problemList.filter(problem => problem.severity === 1).length;
+    const warningsCountMessage = `${warningsCount} warning${warningsCount === 1 ? '' : 's'}`;
+    const infoCount = problemList.filter(problem => problem.severity === 2).length;
+    const infoCountMessage = `${infoCount} info${infoCount === 1 ? '' : 's'}`;
+    const finalMessage = problemsCount
+        ? `${ansi_styles_1.default.yellow.open}${ansi_styles_1.default.bold.open}✖ ${problemsCountMessage} (${errorsCountMessage}, ${warningsCountMessage}, ${infoCountMessage})${ansi_styles_1.default.bold.close}${ansi_styles_1.default.yellow.close}\n`
+        : `${ansi_styles_1.default.green.open}${ansi_styles_1.default.bold.open}No problems found in the provided OpenAPI specification file.${ansi_styles_1.default.bold.close}${ansi_styles_1.default.green.close}\n`;
+    console.log(finalMessage);
+    if (errorsCount) {
+        errors.push(`"${filePath}"`);
+        console.log(`"${filePath}" contains errors.\n`);
+    }
+    else {
+        console.log(`"${filePath}" passes linting.\n`);
+    }
+}
+
+
+/***/ }),
+
 /***/ 22877:
 /***/ ((module) => {
 
@@ -73812,7 +73819,7 @@ module.exports = JSON.parse('[[[0,44],"disallowed_STD3_valid"],[[45,46],"valid"]
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
 /******/ 	// This entry module is referenced by other modules so it can't be inlined
-/******/ 	var __webpack_exports__ = __nccwpck_require__(3109);
+/******/ 	var __webpack_exports__ = __nccwpck_require__(17672);
 /******/ 	module.exports = __webpack_exports__;
 /******/ 	
 /******/ })()

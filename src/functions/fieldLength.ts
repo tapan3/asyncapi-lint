@@ -1,18 +1,13 @@
 export function fieldLength(input: string, options: { min: number }): object[] {
-  try {
-    if (input.length < options.min) {
-      return [
-        {
-          message: `Write a well formatted brief description of your API with atleast 30 char long`,
-        },
-      ];
-    }
+  if (!input) {
     return [];
-  } catch (ex) {
+  }
+  if (input.length < options.min) {
     return [
       {
-        message: ex instanceof Error ? ex.message : String(ex),
+        message: `Write a well formatted brief description of your API with at least 30 char long.`,
       },
     ];
   }
+  return [];
 }
